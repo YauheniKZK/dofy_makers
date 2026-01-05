@@ -84,17 +84,25 @@ const checkUser = async () => {
 }
 
 const handleActivate = async () => {
-  if (!user.value) return
+  if (!telegramId.value) {
+    message.error('Не удалось получить Telegram ID')
+    return
+  }
 
   try {
     loading.value = true
-    await userStore.activateUserAction(user.value.id)
+    await userStore.activateUserAction(telegramId.value)
     
-    if (userStore.activateUserApiDataGetters.success) {
+    if (userStore.activateUserApiDataGetters.success && userStore.activateUserApiDataGetters.data) {
       message.success('Пользователь успешно активирован')
-      user.value.activated = true
+      const activatedUser = userStore.activateUserApiDataGetters.data
+      // Обновляем пользователя данными из ответа
+      if (user.value) {
+        user.value.activated = true
+        user.value.name = activatedUser.name
+        userStore.setUser(user.value)
+      }
       needsActivation.value = false
-      userStore.setUser(user.value)
       router.push('/dashboard')
     } else {
       message.error(userStore.activateUserApiDataGetters.message || 'Ошибка активации')

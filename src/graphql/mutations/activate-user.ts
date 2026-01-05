@@ -4,11 +4,9 @@ export interface ActivatedUser {
   id: string
   telegramId: string | null
   name: string
+  firstName: string | null
+  lastName: string | null
   activated: boolean
-  role: {
-    code: string
-    name: string
-  }
 }
 
 export interface ActivateUserResult {
@@ -21,8 +19,8 @@ export interface ActivateUserResult {
 }
 
 export const ACTIVATE_USER = gql`
-  mutation ActivateUser($userId: ID!) {
-    activateUser(userId: $userId) {
+  mutation ActivateUser($telegramId: String!) {
+    activateUser(telegramId: $telegramId) {
       successfully
       message
       error
@@ -30,11 +28,9 @@ export const ACTIVATE_USER = gql`
         id
         telegramId
         name
+        firstName
+        lastName
         activated
-        role {
-          code
-          name
-        }
       }
     }
   }

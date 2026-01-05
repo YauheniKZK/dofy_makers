@@ -298,12 +298,12 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const activateUserAction = async (userId: string): Promise<void> => {
+  const activateUserAction = async (telegramId: string): Promise<void> => {
     resetApiState(activateUserApiData.value)
     activateUserApiData.value.loading = true
     
     try {
-      const response = await activateUserApi(userId)
+      const response = await activateUserApi(telegramId)
       
       if (response.data?.activateUser?.successfully && response.data.activateUser.data) {
         const activatedUser = response.data.activateUser.data

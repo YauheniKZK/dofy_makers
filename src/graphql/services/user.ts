@@ -46,11 +46,11 @@ const getUserByTelegramId = async (telegramId: string) => {
   })
 }
 
-const activateUser = async (userId: string) => {
+const activateUser = async (telegramId: string) => {
   return await client.mutate<ActivateUserResult>({
     mutation: ACTIVATE_USER,
     variables: {
-      userId
+      telegramId
     }
   })
 }
