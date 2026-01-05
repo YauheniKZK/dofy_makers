@@ -341,12 +341,12 @@ export const useUserStore = defineStore('user', () => {
           telegramId: registeredUser.telegramId,
           activated: registeredUser.activated,
           role: {
-            id: '', // ID не возвращается, оставляем пустую строку
+            id: registeredUser.role.id,
             name: registeredUser.role.name,
             code: registeredUser.role.code,
             description: null
           },
-          createdAt: new Date().toISOString(),
+          createdAt: registeredUser.createdAt,
           updatedAt: new Date().toISOString()
         }
         createUserApiData.value.data = user

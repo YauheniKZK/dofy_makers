@@ -20,7 +20,8 @@ const showRegistration = ref(false)
 const telegramId = ref<string | null>(null)
 
 const registrationForm = ref({
-  name: ''
+  firstName: '',
+  lastName: ''
 })
 
 const checkUser = async () => {
@@ -54,8 +55,11 @@ const checkUser = async () => {
       showRegistration.value = true
       // Предзаполняем имя из Telegram, если доступно
       const telegramUser = WebApp.initDataUnsafe?.user
-      if (telegramUser?.first_name || telegramUser?.last_name) {
-        registrationForm.value.name = `${telegramUser.first_name || ''} ${telegramUser.last_name || ''}`.trim()
+      if (telegramUser?.first_name) {
+        registrationForm.value.firstName = telegramUser.first_name
+      }
+      if (telegramUser?.last_name) {
+        registrationForm.value.lastName = telegramUser.last_name
       }
       loading.value = false
       return
@@ -112,7 +116,8 @@ const handleRegister = async () => {
     loading.value = true
     const createdUser = await userStore.createUserAction({
       telegramId: telegramId.value,
-      name: registrationForm.value.name || undefined
+      firstName: registrationForm.value.firstName || undefined,
+      lastName: registrationForm.value.lastName || undefined
     })
     
     if (createdUser) {
@@ -156,10 +161,17 @@ onMounted(() => {
           <div class="flex flex-col gap-4">
             <p>Добро пожаловать! Вы еще не зарегистрированы в системе.</p>
             <n-form :model="registrationForm">
-              <n-form-item label="Имя" path="name">
+              <n-form-item label="Имя" path="firstName">
                 <n-input
-                  v-model:value="registrationForm.name"
+                  v-model:value="registrationForm.firstName"
                   placeholder="Введите ваше имя"
+                  :disabled="createUserApiDataGetters.loading"
+                />
+              </n-form-item>
+              <n-form-item label="Фамилия" path="lastName">
+                <n-input
+                  v-model:value="registrationForm.lastName"
+                  placeholder="Введите вашу фамилию"
                   :disabled="createUserApiDataGetters.loading"
                 />
               </n-form-item>

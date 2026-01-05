@@ -2,7 +2,8 @@ import gql from 'graphql-tag'
 
 export interface RegisterUserByTelegramInput {
   telegramId: string
-  name?: string
+  firstName?: string
+  lastName?: string
 }
 
 export interface RegisteredUser {
@@ -11,9 +12,11 @@ export interface RegisteredUser {
   name: string
   activated: boolean
   role: {
+    id: string
     code: string
     name: string
   }
+  createdAt: string
 }
 
 export interface RegisterUserResult {
@@ -37,9 +40,11 @@ export const REGISTER_USER = gql`
         name
         activated
         role {
+          id
           code
           name
         }
+        createdAt
       }
     }
   }
