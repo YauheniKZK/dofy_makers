@@ -7,6 +7,7 @@ import packageJson from './package.json';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/dofy_makers/',
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
@@ -18,5 +19,8 @@ export default defineConfig({
   },
   server: {
     port: 5188
+  },
+  build: {
+    outDir: 'dist'
   }
 })
