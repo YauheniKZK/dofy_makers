@@ -3,17 +3,25 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import WebApp from '@twa-dev/sdk'
 import { useUserStore } from '@/stores/user'
-import { NSpin, NCard, NButton, useMessage } from 'naive-ui'
+import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput } from 'naive-ui'
 import type { User } from '@/graphql/queries/get-authenticated-user'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const userStore = useUserStore()
 const message = useMessage()
+const { createUserApiDataGetters } = storeToRefs(userStore)
 
 const loading = ref(true)
 const error = ref<string | null>(null)
 const user = ref<User | null>(null)
 const needsActivation = ref(false)
+const showRegistration = ref(false)
+const telegramId = ref<string | null>(null)
+
+const registrationForm = ref({
+  name: ''
+})
 
 const checkUser = async () => {
   try {
@@ -28,19 +36,27 @@ const checkUser = async () => {
     }
 
     // Получаем telegramId из WebApp.initDataUnsafe.user.id
-    const telegramId = WebApp.initDataUnsafe?.user?.id?.toString()
+    const telegramUserId = WebApp.initDataUnsafe?.user?.id?.toString()
     
-    if (!telegramId) {
+    if (!telegramUserId) {
       error.value = 'Не удалось получить Telegram ID'
       loading.value = false
       return
     }
 
+    telegramId.value = telegramUserId
+
     // Ищем пользователя по telegramId
-    const foundUser = await userStore.getUserByTelegramIdAction(telegramId)
+    const foundUser = await userStore.getUserByTelegramIdAction(telegramUserId)
     
     if (!foundUser) {
-      error.value = 'Пользователь не найден. Обратитесь к администратору.'
+      // Если пользователь не найден, показываем форму регистрации
+      showRegistration.value = true
+      // Предзаполняем имя из Telegram, если доступно
+      const telegramUser = WebApp.initDataUnsafe?.user
+      if (telegramUser?.first_name || telegramUser?.last_name) {
+        registrationForm.value.name = `${telegramUser.first_name || ''} ${telegramUser.last_name || ''}`.trim()
+      }
       loading.value = false
       return
     }
@@ -86,6 +102,41 @@ const handleActivate = async () => {
   }
 }
 
+const handleRegister = async () => {
+  if (!telegramId.value) {
+    message.error('Не удалось получить Telegram ID')
+    return
+  }
+
+  try {
+    loading.value = true
+    const createdUser = await userStore.createUserAction({
+      telegramId: telegramId.value,
+      name: registrationForm.value.name || undefined
+    })
+    
+    if (createdUser) {
+      message.success('Пользователь успешно зарегистрирован')
+      user.value = createdUser
+      
+      // Проверяем, требуется ли активация
+      if (!createdUser.activated) {
+        needsActivation.value = true
+        showRegistration.value = false
+      } else {
+        userStore.setUser(createdUser)
+        router.push('/dashboard')
+      }
+    } else {
+      message.error(userStore.createUserApiDataGetters.message || 'Ошибка регистрации')
+    }
+  } catch (err: any) {
+    message.error(err?.message || 'Ошибка регистрации пользователя')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   checkUser()
 })
@@ -97,6 +148,32 @@ onMounted(() => {
       <div v-if="error" class="max-w-md w-full">
         <n-card title="Ошибка">
           <p class="text-red-500">{{ error }}</p>
+        </n-card>
+      </div>
+      
+      <div v-else-if="showRegistration" class="max-w-md w-full">
+        <n-card title="Регистрация">
+          <div class="flex flex-col gap-4">
+            <p>Добро пожаловать! Вы еще не зарегистрированы в системе.</p>
+            <n-form :model="registrationForm">
+              <n-form-item label="Имя" path="name">
+                <n-input
+                  v-model:value="registrationForm.name"
+                  placeholder="Введите ваше имя"
+                  :disabled="createUserApiDataGetters.loading"
+                />
+              </n-form-item>
+            </n-form>
+            <n-button
+              type="primary"
+              :loading="createUserApiDataGetters.loading"
+              :disabled="createUserApiDataGetters.loading"
+              @click="handleRegister"
+              block
+            >
+              Зарегистрироваться
+            </n-button>
+          </div>
         </n-card>
       </div>
       

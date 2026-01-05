@@ -5,6 +5,7 @@ import { GET_USER_BY_TELEGRAM_ID, type GetUserByTelegramIdResult } from '../quer
 import { LOGIN, type LoginInput, type LoginResult } from '../mutations/create-tokens-user'
 import { REFRESH_TOKEN, type RefreshTokenResult } from '../mutations/refresh-token'
 import { ACTIVATE_USER, type ActivateUserResult } from '../mutations/activate-user'
+import { REGISTER_USER, type RegisterUserByTelegramInput, type RegisterUserResult } from '../mutations/create-user'
 
 const login = async (
   input: LoginInput
@@ -54,10 +55,20 @@ const activateUser = async (userId: string) => {
   })
 }
 
+const registerUserByTelegram = async (input: RegisterUserByTelegramInput) => {
+  return await client.mutate<RegisterUserResult>({
+    mutation: REGISTER_USER,
+    variables: {
+      input
+    }
+  })
+}
+
 export {
   login,
   refreshToken,
   getCurrentUser,
   getUserByTelegramId,
-  activateUser
+  activateUser,
+  registerUserByTelegram
 }

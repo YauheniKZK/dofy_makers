@@ -2,10 +2,11 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
 import router from '@/router'
-import { login as loginApi, refreshToken as refreshTokenApi, getCurrentUser as getCurrentUserApi, getUserByTelegramId as getUserByTelegramIdApi, activateUser as activateUserApi } from '@/graphql/services/user'
+import { login as loginApi, refreshToken as refreshTokenApi, getCurrentUser as getCurrentUserApi, getUserByTelegramId as getUserByTelegramIdApi, activateUser as activateUserApi, registerUserByTelegram as registerUserByTelegramApi } from '@/graphql/services/user'
 import type { LoginInput, AuthPayload } from '@/graphql/mutations/create-tokens-user'
 import type { User } from '@/graphql/queries/get-authenticated-user'
 import type { ActivatedUser } from '@/graphql/mutations/activate-user'
+import type { RegisterUserByTelegramInput } from '@/graphql/mutations/create-user'
 
 const ACCESS_TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
@@ -50,6 +51,7 @@ export const useUserStore = defineStore('user', () => {
   const loginApiData = ref<ApiState<AuthPayload>>(createDefaultApiState<AuthPayload>())
   const refreshTokenApiData = ref<ApiState<AuthPayload>>(createDefaultApiState<AuthPayload>())
   const activateUserApiData = ref<ApiState<ActivatedUser>>(createDefaultApiState<ActivatedUser>())
+  const createUserApiData = ref<ApiState<User>>(createDefaultApiState<User>())
 
   // -----------------GETTERS---------------------
   const currentUserGetters = computed(() => currentUser.value)
@@ -63,6 +65,7 @@ export const useUserStore = defineStore('user', () => {
   const loginApiDataGetters = computed(() => loginApiData.value)
   const refreshTokenApiDataGetters = computed(() => refreshTokenApiData.value)
   const activateUserApiDataGetters = computed(() => activateUserApiData.value)
+  const createUserApiDataGetters = computed(() => createUserApiData.value)
 
   // -----------------ACTIONS---------------------
 
@@ -321,6 +324,51 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const createUserAction = async (input: RegisterUserByTelegramInput): Promise<User | null> => {
+    resetApiState(createUserApiData.value)
+    createUserApiData.value.loading = true
+    
+    try {
+      const response = await registerUserByTelegramApi(input)
+      
+      if (response.data?.registerUserByTelegram?.successfully && response.data.registerUserByTelegram.data) {
+        const registeredUser = response.data.registerUserByTelegram.data
+        // Преобразуем RegisteredUser в User для совместимости
+        const user: User = {
+          id: registeredUser.id,
+          name: registeredUser.name,
+          email: null, // Email не возвращается из registerUserByTelegram
+          telegramId: registeredUser.telegramId,
+          activated: registeredUser.activated,
+          role: {
+            id: '', // ID не возвращается, оставляем пустую строку
+            name: registeredUser.role.name,
+            code: registeredUser.role.code,
+            description: null
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        createUserApiData.value.data = user
+        createUserApiData.value.success = true
+        createUserApiData.value.message = response.data.registerUserByTelegram.message || 'Пользователь успешно зарегистрирован'
+        return user
+      } else {
+        const errorMsg = response.data?.registerUserByTelegram?.error || response.data?.registerUserByTelegram?.message || 'Не удалось зарегистрировать пользователя'
+        createUserApiData.value.error = true
+        createUserApiData.value.message = errorMsg
+        return null
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'Ошибка регистрации пользователя'
+      createUserApiData.value.error = true
+      createUserApiData.value.message = errorMessage
+      return null
+    } finally {
+      createUserApiData.value.loading = false
+    }
+  }
+
   // Инициализация при загрузке store
   const init = async () => {
     // Перечитываем токены из cookies на случай, если они изменились
@@ -366,6 +414,7 @@ export const useUserStore = defineStore('user', () => {
     loginApiData,
     refreshTokenApiData,
     activateUserApiData,
+    createUserApiData,
     
     // Getters
     currentUserGetters,
@@ -379,6 +428,7 @@ export const useUserStore = defineStore('user', () => {
     loginApiDataGetters,
     refreshTokenApiDataGetters,
     activateUserApiDataGetters,
+    createUserApiDataGetters,
     
     // Actions
     loginAction,
@@ -387,6 +437,7 @@ export const useUserStore = defineStore('user', () => {
     logoutAction,
     getUserByTelegramIdAction,
     activateUserAction,
+    createUserAction,
     init,
     setTokens,
     clearTokens,
