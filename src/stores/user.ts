@@ -390,6 +390,7 @@ export const useUserStore = defineStore('user', () => {
     init,
     setTokens,
     clearTokens,
+    setUser,
     
     // Utility functions
     createDefaultApiState,

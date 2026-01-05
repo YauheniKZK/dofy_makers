@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { WebApp } from '@twa-dev/sdk'
+import WebApp from '@twa-dev/sdk'
 import { useUserStore } from '@/stores/user'
 import { NSpin, NCard, NButton, useMessage } from 'naive-ui'
 import type { User } from '@/graphql/queries/get-authenticated-user'

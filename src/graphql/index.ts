@@ -48,11 +48,14 @@ const errorLink = onError((errorHandler: any) => {
         // Пытаемся обновить токен
         const userStore = useUserStore()
         if (userStore.refreshTokenGetters) {
-          userStore.refreshTokenAction().then((success) => {
-            if (!success) {
+          userStore.refreshTokenAction().then(() => {
+            // Проверяем результат через состояние refreshTokenApiData
+            if (userStore.refreshTokenApiDataGetters.error) {
               // Если обновление не удалось, перенаправляем на страницу входа
               userStore.logoutAction()
             }
+          }).catch(() => {
+            userStore.logoutAction()
           })
         } else {
           // Если нет refresh token, перенаправляем на страницу входа
@@ -70,10 +73,13 @@ const errorLink = onError((errorHandler: any) => {
     if (networkErr.statusCode === 401) {
       const userStore = useUserStore()
       if (userStore.refreshTokenGetters) {
-        userStore.refreshTokenAction().then((success) => {
-          if (!success) {
+        userStore.refreshTokenAction().then(() => {
+          // Проверяем результат через состояние refreshTokenApiData
+          if (userStore.refreshTokenApiDataGetters.error) {
             userStore.logoutAction()
           }
+        }).catch(() => {
+          userStore.logoutAction()
         })
       } else {
         userStore.logoutAction()
