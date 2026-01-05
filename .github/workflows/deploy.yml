@@ -10,6 +10,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  deployments: write
 
 concurrency:
   group: "pages"
@@ -22,6 +23,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      deployments: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,8 +44,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        with:
-          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -59,6 +59,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: read
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
