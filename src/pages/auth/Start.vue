@@ -33,8 +33,13 @@ const checkUser = async () => {
     loading.value = true
     error.value = null
 
-    // Очищаем токены, так как для Telegram Mini App авторизация происходит через telegramId
-    userStore.clearTokens()
+    // Проверяем, не загружен ли уже пользователь из init()
+    if (userStore.currentUserGetters && userStore.isAuthenticated) {
+      // Пользователь уже загружен, переходим на dashboard
+      router.push('/dashboard')
+      loading.value = false
+      return
+    }
 
     // Проверяем наличие Telegram WebApp
     if (!WebApp) {
@@ -105,8 +110,16 @@ const checkUser = async () => {
 
     telegramId.value = telegramUserId
 
-    // Ищем пользователя по telegramId
-    const foundUser = await userStore.getUserByTelegramIdAction(telegramUserId)
+    // Проверяем, не загружен ли уже пользователь из init()
+    // Если пользователь уже есть в store с таким telegramId, используем его
+    let foundUser = userStore.currentUserGetters
+    if (!foundUser || foundUser.telegramId !== telegramUserId) {
+      // Ищем пользователя по telegramId только если его еще нет в store
+      console.log('Пользователь не найден в store, вызываем getUserByTelegramIdAction:', telegramUserId)
+      foundUser = await userStore.getUserByTelegramIdAction(telegramUserId)
+    } else {
+      console.log('Пользователь уже загружен из init(), используем его:', foundUser.telegramId)
+    }
     
     if (!foundUser) {
       // Если пользователь не найден, показываем форму регистрации

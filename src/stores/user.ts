@@ -474,11 +474,14 @@ export const useUserStore = defineStore('user', () => {
         if (foundUser) {
           setUser(foundUser)
           
-          // Если токенов нет, но пользователь найден и активирован, получаем токены
-          if (!accessToken.value && foundUser.activated) {
+          // Если пользователь найден и активирован, всегда получаем токены через loginByTelegramId
+          // Это гарантирует, что токены актуальны и соответствуют текущему telegramId
+          if (foundUser.activated) {
+            console.log('Пользователь активирован, получаем токены через loginByTelegramId:', telegramIdToCheck)
             try {
               const { loginByTelegramId } = await import('@/graphql/services/user')
               const loginResult = await loginByTelegramId(telegramIdToCheck)
+              console.log('Результат loginByTelegramId:', loginResult.data?.loginByTelegramId?.successfully)
               
               if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
                 const authData = loginResult.data.loginByTelegramId.data
