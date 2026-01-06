@@ -11,23 +11,31 @@ const router = createRouter({
 })
 
 // Для Telegram Mini App авторизация происходит через telegramId на стартовой странице
-// Дополнительная проверка авторизации не требуется
 router.beforeEach(async (to, from, next) => {
   // Логируем переход для отладки
   console.log('Router navigation:', { from: from.path, to: to.path, base: baseUrl })
   
-  // Если маршрут требует авторизации, проверяем наличие пользователя в store
-  if (to.meta.requiresAuth) {
-    const { useUserStore } = await import('@/stores/user')
-    const userStore = useUserStore()
-    
-    // Если нет пользователя в store, перенаправляем на стартовую страницу
-    if (!userStore.currentUserGetters) {
+  const { useUserStore } = await import('@/stores/user')
+  const userStore = useUserStore()
+  
+  // Если пользователь заблокирован, всегда перенаправляем на стартовую страницу
+  if (userStore.isBlocked) {
+    if (to.path !== '/') {
       return next('/')
     }
-    
-    // Если пользователь заблокирован, перенаправляем на стартовую страницу
-    if (userStore.isBlocked) {
+    return next()
+  }
+  
+  // Если пользователь авторизован (есть токен и пользователь в store) и находится на стартовой странице
+  // перенаправляем на dashboard
+  if (to.path === '/' && userStore.isAuthenticated && userStore.currentUserGetters) {
+    return next('/dashboard')
+  }
+  
+  // Если маршрут требует авторизации, проверяем наличие пользователя в store
+  if (to.meta.requiresAuth) {
+    // Если нет пользователя в store или токена, перенаправляем на стартовую страницу
+    if (!userStore.currentUserGetters || !userStore.isAuthenticated) {
       return next('/')
     }
   }

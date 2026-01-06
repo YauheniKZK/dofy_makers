@@ -7,6 +7,7 @@ import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput } from 'nai
 import type { User } from '@/graphql/queries/get-authenticated-user'
 import { storeToRefs } from 'pinia'
 import { Config } from '@/config'
+import { loginByTelegramId } from '@/graphql/services/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -142,10 +143,48 @@ const checkUser = async () => {
       return
     }
 
-    // Если пользователь активирован, сохраняем его и переходим на главную
-    userStore.setUser(foundUser)
-    userStore.setTelegramId(telegramUserId)
-    router.push('/dashboard')
+    // Если пользователь активирован, получаем токены через loginByTelegramId
+    try {
+      const loginResult = await loginByTelegramId(telegramUserId)
+      
+      if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+        const authData = loginResult.data.loginByTelegramId.data
+        // Сохраняем токены
+        userStore.setTokens({
+          accessToken: authData.accessToken,
+          refreshToken: authData.refreshToken
+        })
+        // Сохраняем пользователя
+        const userData = authData.user as any
+        userStore.setUser({
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          telegramId: userData.telegramId,
+          activated: true,
+          description: userData.description ?? null,
+          shortDescription: userData.shortDescription ?? null,
+          country: userData.country ?? null,
+          city: userData.city ?? null,
+          phone: userData.phone ?? null,
+          role: userData.role,
+          blockReasons: [],
+          createdAt: foundUser.createdAt,
+          updatedAt: foundUser.updatedAt
+        })
+        userStore.setTelegramId(telegramUserId)
+        router.push('/dashboard')
+      } else {
+        const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
+        error.value = `Не удалось получить токены авторизации: ${errorMsg}`
+        loading.value = false
+      }
+    } catch (loginError: any) {
+      const errorMessage = loginError?.message || 'Ошибка получения токенов авторизации'
+      error.value = errorMessage
+      loading.value = false
+      console.error('Ошибка получения токенов:', loginError)
+    }
   } catch (err: any) {
     error.value = err?.message || 'Произошла ошибка при проверке пользователя'
     loading.value = false
@@ -176,22 +215,46 @@ const handleActivate = async () => {
         userStore.setTelegramId(telegramId.value)
       }
       
-      // После активации проверяем блокировку
-      // Перезагружаем пользователя, чтобы получить актуальные данные о блокировке
-      const updatedUser = await userStore.getUserByTelegramIdAction(telegramId.value)
-      if (updatedUser) {
-        if (updatedUser.blockReasons && updatedUser.blockReasons.length > 0) {
-          const reasonsText = updatedUser.blockReasons
-            .map(reason => reason.description || reason.name)
-            .join('\n')
-          error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
-          loading.value = false
-          return
+      // После активации получаем токены через loginByTelegramId
+      try {
+        const loginResult = await loginByTelegramId(telegramId.value)
+        
+        if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+          const authData = loginResult.data.loginByTelegramId.data
+          // Сохраняем токены
+          userStore.setTokens({
+            accessToken: authData.accessToken,
+            refreshToken: authData.refreshToken
+          })
+          // Сохраняем пользователя
+          const userData = authData.user as any
+          userStore.setUser({
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            telegramId: userData.telegramId,
+            activated: true,
+            description: userData.description ?? null,
+            shortDescription: userData.shortDescription ?? null,
+            country: userData.country ?? null,
+            city: userData.city ?? null,
+            phone: userData.phone ?? null,
+            role: userData.role,
+            blockReasons: [],
+            createdAt: userData.createdAt || new Date().toISOString(),
+            updatedAt: userData.updatedAt || new Date().toISOString()
+          })
+          userStore.setTelegramId(telegramId.value)
+          router.push('/dashboard')
+        } else {
+          const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
+          message.error(`Не удалось получить токены: ${errorMsg}`)
         }
-        userStore.setUser(updatedUser)
+      } catch (loginError: any) {
+        const errorMessage = loginError?.message || 'Ошибка получения токенов авторизации'
+        message.error(errorMessage)
+        console.error('Ошибка получения токенов после активации:', loginError)
       }
-      
-      router.push('/dashboard')
     } else {
       message.error(userStore.activateUserApiDataGetters.message || 'Ошибка активации')
     }
@@ -236,11 +299,46 @@ const handleRegister = async () => {
         needsActivation.value = true
         showRegistration.value = false
       } else {
-        userStore.setUser(createdUser)
-        if (telegramId.value) {
-          userStore.setTelegramId(telegramId.value)
+        // Если пользователь уже активирован, получаем токены
+        try {
+          const loginResult = await loginByTelegramId(telegramId.value)
+          
+          if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+            const authData = loginResult.data.loginByTelegramId.data
+            // Сохраняем токены
+            userStore.setTokens({
+              accessToken: authData.accessToken,
+              refreshToken: authData.refreshToken
+            })
+            // Сохраняем пользователя
+            const userData = authData.user as any
+            userStore.setUser({
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              telegramId: userData.telegramId,
+              activated: true,
+              description: userData.description ?? null,
+              shortDescription: userData.shortDescription ?? null,
+              country: userData.country ?? null,
+              city: userData.city ?? null,
+              phone: userData.phone ?? null,
+              role: userData.role,
+              blockReasons: [],
+              createdAt: userData.createdAt || new Date().toISOString(),
+              updatedAt: userData.updatedAt || new Date().toISOString()
+            })
+            userStore.setTelegramId(telegramId.value)
+            router.push('/dashboard')
+          } else {
+            const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
+            message.error(`Не удалось получить токены: ${errorMsg}`)
+          }
+        } catch (loginError: any) {
+          const errorMessage = loginError?.message || 'Ошибка получения токенов авторизации'
+          message.error(errorMessage)
+          console.error('Ошибка получения токенов после регистрации:', loginError)
         }
-        router.push('/dashboard')
       }
     } else {
       message.error(userStore.createUserApiDataGetters.message || 'Ошибка регистрации')

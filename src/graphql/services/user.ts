@@ -7,6 +7,7 @@ import { REFRESH_TOKEN, type RefreshTokenResult } from '../mutations/refresh-tok
 import { ACTIVATE_USER, type ActivateUserResult } from '../mutations/activate-user'
 import { REGISTER_USER, type RegisterUserByTelegramInput, type RegisterUserResult } from '../mutations/create-user'
 import { SEND_TO_CHANNEL, type SendToChannelInput, type SendToChannelResult } from '../mutations/send-to-channel'
+import { LOGIN_BY_TELEGRAM_ID, type LoginByTelegramIdResult } from '../mutations/login-by-telegram-id'
 
 const login = async (
   input: LoginInput
@@ -74,6 +75,15 @@ const sendToChannel = async (input: SendToChannelInput) => {
   })
 }
 
+const loginByTelegramId = async (telegramId: string) => {
+  return await client.mutate<LoginByTelegramIdResult>({
+    mutation: LOGIN_BY_TELEGRAM_ID,
+    variables: {
+      telegramId
+    }
+  })
+}
+
 export {
   login,
   refreshToken,
@@ -81,5 +91,6 @@ export {
   getUserByTelegramId,
   activateUser,
   registerUserByTelegram,
-  sendToChannel
+  sendToChannel,
+  loginByTelegramId
 }

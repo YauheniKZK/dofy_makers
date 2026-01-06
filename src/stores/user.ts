@@ -419,24 +419,6 @@ export const useUserStore = defineStore('user', () => {
 
   // Инициализация при загрузке store
   const init = async () => {
-    // Для Telegram Mini App авторизация происходит через telegramId, а не через токены
-    // Проверяем, запущено ли приложение в Telegram Mini App
-    const savedTelegramId = getTelegramId()
-    
-    if (savedTelegramId) {
-      // Если есть сохраненный telegramId, загружаем пользователя по нему
-      try {
-        const foundUser = await getUserByTelegramIdAction(savedTelegramId)
-        if (foundUser) {
-          setUser(foundUser)
-        }
-      } catch (error) {
-        // Если не удалось загрузить пользователя, очищаем telegramId
-        sessionStorage.removeItem(TELEGRAM_ID_KEY)
-      }
-      return
-    }
-
     // Перечитываем токены из cookies на случай, если они изменились
     const tokenFromCookie = Cookies.get(ACCESS_TOKEN_KEY)
     const refreshTokenFromCookie = Cookies.get(REFRESH_TOKEN_KEY)
@@ -448,13 +430,77 @@ export const useUserStore = defineStore('user', () => {
       refreshToken.value = refreshTokenFromCookie
     }
     
-    // Если есть токен, но нет данных пользователя, загружаем их
-    if ((accessToken.value || tokenFromCookie) && !currentUser.value) {
+    // Для Telegram Mini App авторизация происходит через telegramId
+    // Проверяем, запущено ли приложение в Telegram Mini App
+    const savedTelegramId = getTelegramId()
+    
+    if (savedTelegramId) {
+      // Если есть сохраненный telegramId, загружаем пользователя по нему
+      try {
+        const foundUser = await getUserByTelegramIdAction(savedTelegramId)
+        if (foundUser) {
+          setUser(foundUser)
+          
+          // Если токенов нет, но пользователь найден и активирован, получаем токены
+          if (!accessToken.value && foundUser.activated) {
+            try {
+              const { loginByTelegramId } = await import('@/graphql/services/user')
+              const loginResult = await loginByTelegramId(savedTelegramId)
+              
+              if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+                const authData = loginResult.data.loginByTelegramId.data
+                setTokens({
+                  accessToken: authData.accessToken,
+                  refreshToken: authData.refreshToken
+                })
+                // Обновляем данные пользователя из ответа
+                const userData = authData.user as any
+                setUser({
+                  id: userData.id,
+                  name: userData.name,
+                  email: userData.email,
+                  telegramId: userData.telegramId,
+                  activated: true,
+                  description: userData.description ?? null,
+                  shortDescription: userData.shortDescription ?? null,
+                  country: userData.country ?? null,
+                  city: userData.city ?? null,
+                  phone: userData.phone ?? null,
+                  role: userData.role,
+                  blockReasons: foundUser.blockReasons || [],
+                  createdAt: foundUser.createdAt,
+                  updatedAt: foundUser.updatedAt
+                })
+              }
+            } catch (error) {
+              console.warn('Не удалось получить токены при инициализации:', error)
+            }
+          }
+        }
+      } catch (error) {
+        // Если не удалось загрузить пользователя, очищаем telegramId
+        sessionStorage.removeItem(TELEGRAM_ID_KEY)
+      }
+      
+      // Если есть токены, но нет пользователя, загружаем пользователя
+      if (accessToken.value && !currentUser.value) {
+        try {
+          await fetchCurrentUser()
+        } catch (error) {
+          console.warn('Не удалось загрузить пользователя при инициализации:', error)
+        }
+      }
+      
+      return
+    }
+
+    // Если есть токены, но нет пользователя, загружаем пользователя
+    if (accessToken.value && !currentUser.value) {
       try {
         await fetchCurrentUser()
       } catch (error) {
         // Если не удалось получить пользователя, пытаемся обновить токен
-        if (refreshToken.value || refreshTokenFromCookie) {
+        if (refreshToken.value) {
           await refreshTokenAction()
           // Проверяем результат через состояние refreshTokenApiData
           if (refreshTokenApiData.value.error) {
