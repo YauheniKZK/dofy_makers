@@ -1,12 +1,12 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import getRoutes from "@/router/routes";
 
 // Получаем base URL из переменной окружения или используем дефолтное значение
+// Для GitHub Pages base должен быть с trailing slash: '/dofy_makers/'
 const baseUrl = import.meta.env.BASE_URL || '/dofy_makers/'
 
 const router = createRouter({
-  // Используем hash routing для GitHub Pages - это работает без серверной конфигурации
-  history: createWebHashHistory(baseUrl),
+  history: createWebHistory(baseUrl),
   routes: getRoutes()
 })
 
