@@ -110,93 +110,100 @@ const checkUser = async () => {
 
     telegramId.value = telegramUserId
 
-    // Проверяем, не загружен ли уже пользователь из init()
-    // Если пользователь уже есть в store с таким telegramId, используем его
-    let foundUser = userStore.currentUserGetters
-    if (!foundUser || foundUser.telegramId !== telegramUserId) {
-      // Ищем пользователя по telegramId только если его еще нет в store
-      console.log('Пользователь не найден в store, вызываем getUserByTelegramIdAction:', telegramUserId)
-      foundUser = await userStore.getUserByTelegramIdAction(telegramUserId)
-    } else {
-      console.log('Пользователь уже загружен из init(), используем его:', foundUser.telegramId)
-    }
-    
-    if (!foundUser) {
-      // Если пользователь не найден, показываем форму регистрации
-      showRegistration.value = true
-      // Предзаполняем имя из Telegram, если доступно
-      const telegramUser = WebApp.initDataUnsafe?.user
-      if (telegramUser?.first_name) {
-        registrationForm.value.firstName = telegramUser.first_name
-      }
-      if (telegramUser?.last_name) {
-        registrationForm.value.lastName = telegramUser.last_name
-      }
-      loading.value = false
-      return
-    }
-
-    user.value = foundUser
-
-    // Проверяем блокировку пользователя
-    if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
-      // Пользователь заблокирован, показываем сообщение
-      const reasonsText = foundUser.blockReasons
-        .map(reason => reason.description || reason.name)
-        .join('\n')
-      error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
-      loading.value = false
-      return
-    }
-
-    // Проверяем поле activated
-    if (!foundUser.activated) {
-      needsActivation.value = true
-      loading.value = false
-      return
-    }
-
-    // Если пользователь активирован, получаем токены через loginByTelegramId
+    // Используем loginByTelegramId напрямую для авторизации
+    console.log('Вызываем loginByTelegramId для авторизации:', telegramUserId)
     try {
       const loginResult = await loginByTelegramId(telegramUserId)
       
       if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+        // Авторизация успешна - получили токены
         const authData = loginResult.data.loginByTelegramId.data
+        
         // Сохраняем токены
         userStore.setTokens({
           accessToken: authData.accessToken,
           refreshToken: authData.refreshToken
         })
-        // Сохраняем пользователя
-        const userData = authData.user as any
-        userStore.setUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          telegramId: userData.telegramId,
-          activated: true,
-          description: userData.description ?? null,
-          shortDescription: userData.shortDescription ?? null,
-          country: userData.country ?? null,
-          city: userData.city ?? null,
-          phone: userData.phone ?? null,
-          role: userData.role,
-          blockReasons: [],
-          createdAt: foundUser.createdAt,
-          updatedAt: foundUser.updatedAt
-        })
         userStore.setTelegramId(telegramUserId)
-        router.push('/dashboard')
+        
+        // После получения токенов загружаем пользователя через getCurrentUser
+        console.log('Токены получены, загружаем пользователя через fetchCurrentUser')
+        try {
+          await userStore.fetchCurrentUser()
+          
+          const foundUser = userStore.currentUserGetters
+          if (!foundUser) {
+            error.value = 'Не удалось загрузить данные пользователя'
+            loading.value = false
+            return
+          }
+          
+          user.value = foundUser
+          
+          // Проверяем блокировку пользователя
+          if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
+            const reasonsText = foundUser.blockReasons
+              .map((reason: any) => reason.description || reason.name)
+              .join('\n')
+            error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+            loading.value = false
+            return
+          }
+          
+          // Проверяем поле activated
+          if (!foundUser.activated) {
+            needsActivation.value = true
+            loading.value = false
+            return
+          }
+          
+          // Пользователь активирован, переходим на dashboard
+          router.push('/dashboard')
+        } catch (fetchError: any) {
+          const errorMessage = fetchError?.message || 'Ошибка загрузки данных пользователя'
+          error.value = errorMessage
+          loading.value = false
+          console.error('Ошибка загрузки пользователя после авторизации:', fetchError)
+        }
       } else {
-        const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
-        error.value = `Не удалось получить токены авторизации: ${errorMsg}`
+        // Пользователь не найден или ошибка авторизации
+        const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Пользователь не найден'
+        
+        // Если пользователь не найден, показываем форму регистрации
+        if (errorMsg.toLowerCase().includes('не найден') || errorMsg.toLowerCase().includes('not found')) {
+          showRegistration.value = true
+          // Предзаполняем имя из Telegram, если доступно
+          const telegramUser = WebApp.initDataUnsafe?.user
+          if (telegramUser?.first_name) {
+            registrationForm.value.firstName = telegramUser.first_name
+          }
+          if (telegramUser?.last_name) {
+            registrationForm.value.lastName = telegramUser.last_name
+          }
+        } else {
+          error.value = `Ошибка авторизации: ${errorMsg}`
+        }
         loading.value = false
       }
     } catch (loginError: any) {
-      const errorMessage = loginError?.message || 'Ошибка получения токенов авторизации'
-      error.value = errorMessage
+      const errorMessage = loginError?.message || 'Ошибка авторизации'
+      
+      // Если пользователь не найден, показываем форму регистрации
+      if (errorMessage.toLowerCase().includes('не найден') || errorMessage.toLowerCase().includes('not found')) {
+        showRegistration.value = true
+        // Предзаполняем имя из Telegram, если доступно
+        const telegramUser = WebApp.initDataUnsafe?.user
+        if (telegramUser?.first_name) {
+          registrationForm.value.firstName = telegramUser.first_name
+        }
+        if (telegramUser?.last_name) {
+          registrationForm.value.lastName = telegramUser.last_name
+        }
+      } else {
+        error.value = errorMessage
+      }
       loading.value = false
-      console.error('Ошибка получения токенов:', loginError)
+      console.error('Ошибка авторизации через loginByTelegramId:', loginError)
     }
   } catch (err: any) {
     error.value = err?.message || 'Произошла ошибка при проверке пользователя'
