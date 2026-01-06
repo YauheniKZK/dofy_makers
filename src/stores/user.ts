@@ -419,26 +419,17 @@ export const useUserStore = defineStore('user', () => {
 
   // Инициализация при загрузке store
   const init = async () => {
-    // Перечитываем токены из cookies на случай, если они изменились
-    const tokenFromCookie = Cookies.get(ACCESS_TOKEN_KEY)
-    const refreshTokenFromCookie = Cookies.get(REFRESH_TOKEN_KEY)
-    
-    if (tokenFromCookie && !accessToken.value) {
-      accessToken.value = tokenFromCookie
-    }
-    if (refreshTokenFromCookie && !refreshToken.value) {
-      refreshToken.value = refreshTokenFromCookie
-    }
-    
     // Для Telegram Mini App авторизация происходит через telegramId
     // Сначала пытаемся получить telegramId из WebApp (если доступен)
     let telegramIdToCheck: string | null = null
+    let telegramIdFromWebApp = false
     
     try {
       // Пробуем получить telegramId из WebApp
       const WebApp = (window as any).Telegram?.WebApp || (window as any).WebApp
       if (WebApp?.initDataUnsafe?.user?.id) {
         telegramIdToCheck = WebApp.initDataUnsafe.user.id.toString()
+        telegramIdFromWebApp = true
       } else if (WebApp?.initData) {
         // Пробуем распарсить initData
         try {
@@ -448,6 +439,7 @@ export const useUserStore = defineStore('user', () => {
             const userObj = JSON.parse(decodeURIComponent(userData))
             if (userObj?.id) {
               telegramIdToCheck = userObj.id.toString()
+              telegramIdFromWebApp = true
             }
           }
         } catch (e) {
@@ -468,7 +460,19 @@ export const useUserStore = defineStore('user', () => {
       if (!getTelegramId()) {
         setTelegramId(telegramIdToCheck)
       }
-      // Если есть telegramId, загружаем пользователя по нему
+      
+      // Если есть telegramId из WebApp (первый запуск), всегда используем loginByTelegramId
+      // Не используем токены из cookies при первом запуске
+      if (telegramIdFromWebApp) {
+        console.log('Первый запуск приложения, получаем telegramId из WebApp:', telegramIdToCheck)
+        // Очищаем старые токены из cookies при первом запуске
+        if (accessToken.value || refreshToken.value) {
+          console.log('Очищаем старые токены при первом запуске')
+          clearTokens()
+        }
+      }
+      
+      // Загружаем пользователя по telegramId
       try {
         const foundUser = await getUserByTelegramIdAction(telegramIdToCheck)
         if (foundUser) {
@@ -518,16 +522,27 @@ export const useUserStore = defineStore('user', () => {
         sessionStorage.removeItem(TELEGRAM_ID_KEY)
       }
       
-      // Если есть токены, но нет пользователя, загружаем пользователя
-      if (accessToken.value && !currentUser.value) {
-        try {
-          await fetchCurrentUser()
-        } catch (error) {
-          console.warn('Не удалось загрузить пользователя при инициализации:', error)
-        }
-      }
-      
       return
+    }
+    
+    // Если нет telegramId, используем токены из cookies (для обычной авторизации)
+    const tokenFromCookie = Cookies.get(ACCESS_TOKEN_KEY)
+    const refreshTokenFromCookie = Cookies.get(REFRESH_TOKEN_KEY)
+    
+    if (tokenFromCookie && !accessToken.value) {
+      accessToken.value = tokenFromCookie
+    }
+    if (refreshTokenFromCookie && !refreshToken.value) {
+      refreshToken.value = refreshTokenFromCookie
+    }
+    
+    // Если есть токены, но нет пользователя, загружаем пользователя
+    if (accessToken.value && !currentUser.value) {
+      try {
+        await fetchCurrentUser()
+      } catch (error) {
+        console.warn('Не удалось загрузить пользователя при инициализации:', error)
+      }
     }
 
     // Если есть токены, но нет пользователя, загружаем пользователя
