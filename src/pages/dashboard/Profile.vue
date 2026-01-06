@@ -1,14 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
-import { NCard, NDescriptions, NDescriptionsItem, NTag, NAvatar, NDivider, NText } from 'naive-ui'
+import { NCard, NDescriptions, NDescriptionsItem, NTag, NAvatar, NDivider, NText, NButton, useMessage } from 'naive-ui'
 import { Person20Regular, Mail20Regular, Phone20Regular, Location20Regular, DocumentText20Regular, Briefcase20Regular, ShieldCheckmark20Regular } from '@vicons/fluent'
+import { sendToChannel } from '@/graphql/services/user'
 
 const userStore = useUserStore()
 const { currentUserGetters } = storeToRefs(userStore)
+const message = useMessage()
 
 const user = computed(() => currentUserGetters.value)
+const sendingMessage = ref(false)
+
+const handleTestSend = async () => {
+  if (!user.value) {
+    message.error('Пользователь не найден')
+    return
+  }
+
+  try {
+    sendingMessage.value = true
+    const result = await sendToChannel({
+      message: `Привет из Mini App! Тестовое сообщение от ${user.value.name}`,
+      parseMode: 'HTML'
+    })
+
+    if (result.data?.sendToChannel?.successfully) {
+      message.success('Сообщение успешно отправлено в канал!')
+      console.log('Результат отправки:', result.data.sendToChannel.data)
+    } else {
+      const errorMsg = result.data?.sendToChannel?.error || result.data?.sendToChannel?.message || 'Неизвестная ошибка'
+      message.error(`Ошибка отправки: ${errorMsg}`)
+    }
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Ошибка при отправке сообщения'
+    message.error(errorMessage)
+    console.error('Ошибка отправки:', error)
+  } finally {
+    sendingMessage.value = false
+  }
+}
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Не указано'
@@ -141,6 +173,22 @@ const getInitials = (name: string | null | undefined) => {
             <n-text type="info" code>{{ user.id }}</n-text>
           </n-descriptions-item>
         </n-descriptions>
+      </n-card>
+
+      <!-- Тестовая кнопка отправки в канал -->
+      <n-card title="Тестирование">
+        <div class="flex flex-col gap-2">
+          <n-text>Отправить тестовое сообщение в канал Telegram</n-text>
+          <n-button
+            type="primary"
+            :loading="sendingMessage"
+            :disabled="sendingMessage"
+            @click="handleTestSend"
+            block
+          >
+            Отправить тестовое сообщение
+          </n-button>
+        </div>
       </n-card>
     </div>
 
