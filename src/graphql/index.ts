@@ -4,6 +4,7 @@ import { HttpLink } from '@apollo/client/link/http'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import { Config } from '@/config'
+import WebApp from '@twa-dev/sdk'
 
 // Настройка HTTP-ссылки
 const httpLink = new HttpLink({
@@ -14,11 +15,43 @@ const httpLink = new HttpLink({
 const authLink = setContext((_, { headers }) => {
   const userStore = useUserStore()
   const token = userStore.accessTokenGetters
+  
+  // Если токена нет, пытаемся использовать telegramId из WebApp для Telegram Mini App
+  let authHeader = ''
+  
+  if (token) {
+    authHeader = `Bearer ${token}`
+  } else {
+    // Для Telegram Mini App используем telegramId из WebApp или из store
+    try {
+      // Пробуем получить telegramId из разных источников
+      const telegramId = WebApp?.initDataUnsafe?.user?.id?.toString() || 
+                        (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() ||
+                        userStore.currentUserGetters?.telegramId ||
+                        userStore.getTelegramId()
+      
+      if (telegramId) {
+        // Используем telegramId в заголовке для авторизации
+        // Формат может быть разным в зависимости от сервера
+        authHeader = `Bearer ${telegramId}` // или `Telegram ${telegramId}` в зависимости от сервера
+        console.log('Using telegramId for authorization:', telegramId)
+      } else {
+        console.warn('No token and no telegramId found for authorization')
+      }
+    } catch (e) {
+      console.warn('Не удалось получить telegramId для авторизации:', e)
+    }
+  }
+
+  // Логируем заголовок авторизации для отладки (без самого токена)
+  if (authHeader) {
+    console.log('Authorization header:', authHeader.substring(0, 20) + '...')
+  }
 
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : '',
+      authorization: authHeader,
     },
   }
 })
