@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'url'
-import { copyFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 
 import packageJson from './package.json';
@@ -14,10 +14,10 @@ const create404Plugin = () => {
     closeBundle() {
       const distPath = resolve(__dirname, 'dist')
       try {
-        copyFileSync(
-          resolve(distPath, 'index.html'),
-          resolve(distPath, '404.html')
-        )
+        // Читаем index.html
+        const indexHtml = readFileSync(resolve(distPath, 'index.html'), 'utf-8')
+        // Записываем его как 404.html
+        writeFileSync(resolve(distPath, '404.html'), indexHtml, 'utf-8')
         console.log('✓ Created 404.html for GitHub Pages SPA routing')
       } catch (error) {
         console.error('Failed to create 404.html:', error)
