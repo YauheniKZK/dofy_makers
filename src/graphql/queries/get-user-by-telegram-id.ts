@@ -21,11 +21,22 @@ export const GET_USER_BY_TELEGRAM_ID = gql`
         email
         telegramId
         activated
+        description
+        shortDescription
+        country
+        city
+        phone
         role {
           id
           name
           code
           description
+        }
+        blockReasons {
+          id
+          name
+          description
+          isActive
         }
         createdAt
         updatedAt

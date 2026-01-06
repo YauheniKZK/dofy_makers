@@ -4,12 +4,13 @@ import Cookies from 'js-cookie'
 import router from '@/router'
 import { login as loginApi, refreshToken as refreshTokenApi, getCurrentUser as getCurrentUserApi, getUserByTelegramId as getUserByTelegramIdApi, activateUser as activateUserApi, registerUserByTelegram as registerUserByTelegramApi } from '@/graphql/services/user'
 import type { LoginInput, AuthPayload } from '@/graphql/mutations/create-tokens-user'
-import type { User } from '@/graphql/queries/get-authenticated-user'
+import type { User, BlockReason } from '@/graphql/queries/get-authenticated-user'
 import type { ActivatedUser } from '@/graphql/mutations/activate-user'
 import type { RegisterUserByTelegramInput } from '@/graphql/mutations/create-user'
 
 const ACCESS_TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
+const TELEGRAM_ID_KEY = 'telegram_id'
 const TOKEN_EXPIRY_DAYS = 7
 
 // Универсальный интерфейс для состояния запроса
@@ -58,6 +59,14 @@ export const useUserStore = defineStore('user', () => {
   const accessTokenGetters = computed(() => accessToken.value)
   const refreshTokenGetters = computed(() => refreshToken.value)
   const isAuthenticated = computed(() => !!accessToken.value)
+  const isBlocked = computed(() => {
+    if (!currentUser.value) return false
+    return currentUser.value.blockReasons && currentUser.value.blockReasons.length > 0
+  })
+  const blockReasons = computed(() => {
+    if (!currentUser.value) return []
+    return currentUser.value.blockReasons || []
+  })
   
   // Геттеры для API состояний
   const getUserByTelegramIdApiDataGetters = computed(() => getUserByTelegramIdApiData.value)
@@ -93,6 +102,15 @@ export const useUserStore = defineStore('user', () => {
     
     Cookies.remove(ACCESS_TOKEN_KEY)
     Cookies.remove(REFRESH_TOKEN_KEY)
+    sessionStorage.removeItem(TELEGRAM_ID_KEY)
+  }
+
+  const setTelegramId = (telegramId: string) => {
+    sessionStorage.setItem(TELEGRAM_ID_KEY, telegramId)
+  }
+
+  const getTelegramId = (): string | null => {
+    return sessionStorage.getItem(TELEGRAM_ID_KEY)
   }
 
   const setUser = (user: User) => {
@@ -124,7 +142,13 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          description: userData.description ?? null,
+          shortDescription: userData.shortDescription ?? null,
+          country: userData.country ?? null,
+          city: userData.city ?? null,
+          phone: userData.phone ?? null,
           role: userData.role,
+          blockReasons: userData.blockReasons || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         })
@@ -174,7 +198,13 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          description: userData.description ?? null,
+          shortDescription: userData.shortDescription ?? null,
+          country: userData.country ?? null,
+          city: userData.city ?? null,
+          phone: userData.phone ?? null,
           role: userData.role,
+          blockReasons: userData.blockReasons || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         })
@@ -219,7 +249,13 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          description: userData.description ?? null,
+          shortDescription: userData.shortDescription ?? null,
+          country: userData.country ?? null,
+          city: userData.city ?? null,
+          phone: userData.phone ?? null,
           role: userData.role,
+          blockReasons: userData.blockReasons || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         }
@@ -274,7 +310,13 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          description: userData.description ?? null,
+          shortDescription: userData.shortDescription ?? null,
+          country: userData.country ?? null,
+          city: userData.city ?? null,
+          phone: userData.phone ?? null,
           role: userData.role,
+          blockReasons: userData.blockReasons || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         }
@@ -340,12 +382,18 @@ export const useUserStore = defineStore('user', () => {
           email: null, // Email не возвращается из registerUserByTelegram
           telegramId: registeredUser.telegramId,
           activated: registeredUser.activated,
+          description: (registeredUser as any).description ?? null,
+          shortDescription: (registeredUser as any).shortDescription ?? null,
+          country: (registeredUser as any).country ?? null,
+          city: (registeredUser as any).city ?? null,
+          phone: (registeredUser as any).phone ?? null,
           role: {
             id: registeredUser.role.id,
             name: registeredUser.role.name,
             code: registeredUser.role.code,
             description: null
           },
+          blockReasons: (registeredUser as any).blockReasons || [],
           createdAt: registeredUser.createdAt,
           updatedAt: new Date().toISOString()
         }
@@ -371,6 +419,24 @@ export const useUserStore = defineStore('user', () => {
 
   // Инициализация при загрузке store
   const init = async () => {
+    // Для Telegram Mini App авторизация происходит через telegramId, а не через токены
+    // Проверяем, запущено ли приложение в Telegram Mini App
+    const savedTelegramId = getTelegramId()
+    
+    if (savedTelegramId) {
+      // Если есть сохраненный telegramId, загружаем пользователя по нему
+      try {
+        const foundUser = await getUserByTelegramIdAction(savedTelegramId)
+        if (foundUser) {
+          setUser(foundUser)
+        }
+      } catch (error) {
+        // Если не удалось загрузить пользователя, очищаем telegramId
+        sessionStorage.removeItem(TELEGRAM_ID_KEY)
+      }
+      return
+    }
+
     // Перечитываем токены из cookies на случай, если они изменились
     const tokenFromCookie = Cookies.get(ACCESS_TOKEN_KEY)
     const refreshTokenFromCookie = Cookies.get(REFRESH_TOKEN_KEY)
@@ -421,6 +487,8 @@ export const useUserStore = defineStore('user', () => {
     accessTokenGetters,
     refreshTokenGetters,
     isAuthenticated,
+    isBlocked,
+    blockReasons,
     
     // API Data Getters
     getUserByTelegramIdApiDataGetters,
@@ -442,6 +510,8 @@ export const useUserStore = defineStore('user', () => {
     setTokens,
     clearTokens,
     setUser,
+    setTelegramId,
+    getTelegramId,
     
     // Utility functions
     createDefaultApiState,

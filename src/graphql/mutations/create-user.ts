@@ -4,6 +4,11 @@ export interface RegisterUserByTelegramInput {
   telegramId: string
   firstName?: string
   lastName?: string
+  description?: string
+  shortDescription?: string
+  country?: string
+  city?: string
+  phone?: string
 }
 
 export interface RegisteredUser {
@@ -11,6 +16,11 @@ export interface RegisteredUser {
   telegramId: string | null
   name: string
   activated: boolean
+  description?: string | null
+  shortDescription?: string | null
+  country?: string | null
+  city?: string | null
+  phone?: string | null
   role: {
     id: string
     code: string
@@ -39,6 +49,11 @@ export const REGISTER_USER = gql`
         telegramId
         name
         activated
+        description
+        shortDescription
+        country
+        city
+        phone
         role {
           id
           code

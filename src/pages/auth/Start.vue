@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import WebApp from '@twa-dev/sdk'
 import { useUserStore } from '@/stores/user'
 import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput } from 'naive-ui'
 import type { User } from '@/graphql/queries/get-authenticated-user'
 import { storeToRefs } from 'pinia'
+import { Config } from '@/config'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -24,10 +25,15 @@ const registrationForm = ref({
   lastName: ''
 })
 
+const hasTestTelegramId = computed(() => !!Config.MY_TELEGRAM_ID)
+
 const checkUser = async () => {
   try {
     loading.value = true
     error.value = null
+
+    // Очищаем токены, так как для Telegram Mini App авторизация происходит через telegramId
+    userStore.clearTokens()
 
     // Проверяем наличие Telegram WebApp
     if (!WebApp) {
@@ -67,6 +73,17 @@ const checkUser = async () => {
 
     user.value = foundUser
 
+    // Проверяем блокировку пользователя
+    if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
+      // Пользователь заблокирован, показываем сообщение
+      const reasonsText = foundUser.blockReasons
+        .map(reason => reason.description || reason.name)
+        .join('\n')
+      error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+      loading.value = false
+      return
+    }
+
     // Проверяем поле activated
     if (!foundUser.activated) {
       needsActivation.value = true
@@ -76,6 +93,7 @@ const checkUser = async () => {
 
     // Если пользователь активирован, сохраняем его и переходим на главную
     userStore.setUser(foundUser)
+    userStore.setTelegramId(telegramUserId)
     router.push('/dashboard')
   } catch (err: any) {
     error.value = err?.message || 'Произошла ошибка при проверке пользователя'
@@ -103,6 +121,25 @@ const handleActivate = async () => {
         userStore.setUser(user.value)
       }
       needsActivation.value = false
+      if (telegramId.value) {
+        userStore.setTelegramId(telegramId.value)
+      }
+      
+      // После активации проверяем блокировку
+      // Перезагружаем пользователя, чтобы получить актуальные данные о блокировке
+      const updatedUser = await userStore.getUserByTelegramIdAction(telegramId.value)
+      if (updatedUser) {
+        if (updatedUser.blockReasons && updatedUser.blockReasons.length > 0) {
+          const reasonsText = updatedUser.blockReasons
+            .map(reason => reason.description || reason.name)
+            .join('\n')
+          error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+          loading.value = false
+          return
+        }
+        userStore.setUser(updatedUser)
+      }
+      
       router.push('/dashboard')
     } else {
       message.error(userStore.activateUserApiDataGetters.message || 'Ошибка активации')
@@ -132,12 +169,26 @@ const handleRegister = async () => {
       message.success('Пользователь успешно зарегистрирован')
       user.value = createdUser
       
+      // Проверяем блокировку пользователя
+      if (createdUser.blockReasons && createdUser.blockReasons.length > 0) {
+        const reasonsText = createdUser.blockReasons
+          .map(reason => reason.description || reason.name)
+          .join('\n')
+        error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+        showRegistration.value = false
+        loading.value = false
+        return
+      }
+      
       // Проверяем, требуется ли активация
       if (!createdUser.activated) {
         needsActivation.value = true
         showRegistration.value = false
       } else {
         userStore.setUser(createdUser)
+        if (telegramId.value) {
+          userStore.setTelegramId(telegramId.value)
+        }
         router.push('/dashboard')
       }
     } else {
@@ -150,6 +201,63 @@ const handleRegister = async () => {
   }
 }
 
+const handleTestLogin = async () => {
+  if (!Config.MY_TELEGRAM_ID) {
+    message.error('MY_TELEGRAM_ID не задан в конфигурации')
+    return
+  }
+
+  try {
+    loading.value = true
+    error.value = null
+    showRegistration.value = false
+    needsActivation.value = false
+
+    // Очищаем токены, так как для Telegram Mini App авторизация происходит через telegramId
+    userStore.clearTokens()
+
+    telegramId.value = Config.MY_TELEGRAM_ID
+
+    // Ищем пользователя по telegramId
+    const foundUser = await userStore.getUserByTelegramIdAction(Config.MY_TELEGRAM_ID)
+    
+    if (!foundUser) {
+      // Если пользователь не найден, показываем форму регистрации
+      showRegistration.value = true
+      loading.value = false
+      return
+    }
+
+    user.value = foundUser
+
+    // Проверяем блокировку пользователя
+    if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
+      // Пользователь заблокирован, показываем сообщение
+      const reasonsText = foundUser.blockReasons
+        .map(reason => reason.description || reason.name)
+        .join('\n')
+      error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+      loading.value = false
+      return
+    }
+
+    // Проверяем поле activated
+    if (!foundUser.activated) {
+      needsActivation.value = true
+      loading.value = false
+      return
+    }
+
+    // Если пользователь активирован, сохраняем его и переходим на главную
+    userStore.setUser(foundUser)
+    userStore.setTelegramId(Config.MY_TELEGRAM_ID)
+    router.push('/dashboard')
+  } catch (err: any) {
+    error.value = err?.message || 'Произошла ошибка при проверке пользователя'
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   checkUser()
 })
@@ -157,10 +265,22 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col items-center justify-center h-full p-4">
+    <!-- Временная кнопка для тестирования -->
+    <div v-if="hasTestTelegramId" class="mb-4 max-w-md w-full">
+      <n-button
+        type="warning"
+        :disabled="loading"
+        @click="handleTestLogin"
+        block
+      >
+        Тестовый вход (ID: {{ Config.MY_TELEGRAM_ID }})
+      </n-button>
+    </div>
+    
     <n-spin :show="loading">
       <div v-if="error" class="max-w-md w-full">
         <n-card title="Ошибка">
-          <p class="text-red-500">{{ error }}</p>
+          <pre class="whitespace-pre-wrap text-red-500">{{ error }}</pre>
         </n-card>
       </div>
       

@@ -18,6 +18,11 @@ router.beforeEach(async (to, from, next) => {
     if (!userStore.currentUserGetters) {
       return next('/')
     }
+    
+    // Если пользователь заблокирован, перенаправляем на стартовую страницу
+    if (userStore.isBlocked) {
+      return next('/')
+    }
   }
 
   next()
