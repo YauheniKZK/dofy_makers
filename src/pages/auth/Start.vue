@@ -42,11 +42,62 @@ const checkUser = async () => {
       return
     }
 
-    // Получаем telegramId из WebApp.initDataUnsafe.user.id
-    const telegramUserId = WebApp.initDataUnsafe?.user?.id?.toString()
+    // Инициализируем WebApp и ждем готовности
+    WebApp.ready()
+    WebApp.expand()
+
+    // Небольшая задержка для мобильных устройств, чтобы WebApp успел инициализироваться
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Пробуем получить telegramId разными способами
+    let telegramUserId: string | null = null
+
+    // Способ 1: из initDataUnsafe.user.id (основной способ)
+    if (WebApp.initDataUnsafe?.user?.id) {
+      telegramUserId = WebApp.initDataUnsafe.user.id.toString()
+    }
+
+    // Способ 2: из initData (если initDataUnsafe недоступен)
+    if (!telegramUserId && WebApp.initData) {
+      try {
+        const initData = new URLSearchParams(WebApp.initData)
+        const userData = initData.get('user')
+        if (userData) {
+          const userObj = JSON.parse(decodeURIComponent(userData))
+          if (userObj?.id) {
+            telegramUserId = userObj.id.toString()
+          }
+        }
+      } catch (e) {
+        console.warn('Не удалось распарсить initData:', e)
+      }
+    }
+
+    // Способ 3: из window.Telegram.WebApp (для мобильных)
+    if (!telegramUserId && (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+      telegramUserId = (window as any).Telegram.WebApp.initDataUnsafe.user.id.toString()
+    }
+
+    // Логируем для отладки
+    console.log('WebApp:', {
+      initDataUnsafe: WebApp.initDataUnsafe,
+      initData: WebApp.initData ? 'present' : 'missing',
+      platform: WebApp.platform,
+      version: WebApp.version,
+      telegramUserId
+    })
     
     if (!telegramUserId) {
-      error.value = 'Не удалось получить Telegram ID'
+      const platform = WebApp.platform || 'unknown'
+      const version = WebApp.version || 'unknown'
+      error.value = `Не удалось получить Telegram ID.\n\nПлатформа: ${platform}\nВерсия: ${version}\n\nУбедитесь, что приложение запущено через Telegram.`
+      console.error('Не удалось получить Telegram ID:', {
+        platform,
+        version,
+        initDataUnsafe: WebApp.initDataUnsafe,
+        initData: WebApp.initData ? 'present' : 'missing',
+        WebApp: WebApp
+      })
       loading.value = false
       return
     }

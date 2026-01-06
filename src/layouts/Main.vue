@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import BottomNavigation from '@/components/BottomNavigation.vue'
+import DevToolsButton from '@/components/DevToolsButton.vue'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -24,6 +25,7 @@ const showBottomNavigation = computed(() => {
       ]" 
     />
     <BottomNavigation v-if="showBottomNavigation" />
+    <DevToolsButton />
   </div>
 </template>
 
