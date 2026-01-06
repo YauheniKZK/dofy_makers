@@ -4,7 +4,6 @@ import { HttpLink } from '@apollo/client/link/http'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import { Config } from '@/config'
-import WebApp from '@twa-dev/sdk'
 
 // Настройка HTTP-ссылки
 const httpLink = new HttpLink({
