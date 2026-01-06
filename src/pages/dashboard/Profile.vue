@@ -19,11 +19,24 @@ const handleTestSend = async () => {
     return
   }
 
+  // Проверяем наличие обязательных полей
+  if (!user.value.telegramId) {
+    message.error('Telegram ID не найден')
+    return
+  }
+
+  if (!user.value.id) {
+    message.error('User ID не найден')
+    return
+  }
+
   try {
     sendingMessage.value = true
     const result = await sendToChannel({
       message: `Привет из Mini App! Тестовое сообщение от ${user.value.name}`,
-      parseMode: 'HTML'
+      parseMode: 'HTML',
+      telegramId: user.value.telegramId,
+      userId: user.value.id
     })
 
     if (result.data?.sendToChannel?.successfully) {
