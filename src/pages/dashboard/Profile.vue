@@ -20,24 +20,41 @@ const handleTestSend = async () => {
   }
 
   // Проверяем наличие обязательных полей
-  if (!user.value.telegramId) {
+  const telegramId = user.value.telegramId
+  const userId = user.value.id
+
+  if (!telegramId || telegramId === null || telegramId === undefined) {
     message.error('Telegram ID не найден')
+    console.error('Telegram ID отсутствует:', user.value)
     return
   }
 
-  if (!user.value.id) {
+  if (!userId || userId === null || userId === undefined) {
     message.error('User ID не найден')
+    console.error('User ID отсутствует:', user.value)
     return
   }
 
   try {
     sendingMessage.value = true
-    const result = await sendToChannel({
+    
+    // Подготавливаем данные для отправки - явно преобразуем в строки
+    const inputData = {
       message: `Привет из Mini App! Тестовое сообщение от ${user.value.name}`,
-      parseMode: 'HTML',
+      parseMode: 'HTML' as const,
+      telegramId: String(telegramId),
+      userId: String(userId)
+    }
+    
+    // Логируем данные перед отправкой
+    console.log('Отправка сообщения с данными:', inputData)
+    console.log('Данные пользователя:', {
+      id: user.value.id,
       telegramId: user.value.telegramId,
-      userId: user.value.id
+      name: user.value.name
     })
+    
+    const result = await sendToChannel(inputData)
 
     if (result.data?.sendToChannel?.successfully) {
       message.success('Сообщение успешно отправлено в канал!')
