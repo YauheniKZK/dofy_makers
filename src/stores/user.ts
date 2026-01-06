@@ -431,13 +431,46 @@ export const useUserStore = defineStore('user', () => {
     }
     
     // Для Telegram Mini App авторизация происходит через telegramId
-    // Проверяем, запущено ли приложение в Telegram Mini App
-    const savedTelegramId = getTelegramId()
+    // Сначала пытаемся получить telegramId из WebApp (если доступен)
+    let telegramIdToCheck: string | null = null
     
-    if (savedTelegramId) {
-      // Если есть сохраненный telegramId, загружаем пользователя по нему
+    try {
+      // Пробуем получить telegramId из WebApp
+      const WebApp = (window as any).Telegram?.WebApp || (window as any).WebApp
+      if (WebApp?.initDataUnsafe?.user?.id) {
+        telegramIdToCheck = WebApp.initDataUnsafe.user.id.toString()
+      } else if (WebApp?.initData) {
+        // Пробуем распарсить initData
+        try {
+          const initData = new URLSearchParams(WebApp.initData)
+          const userData = initData.get('user')
+          if (userData) {
+            const userObj = JSON.parse(decodeURIComponent(userData))
+            if (userObj?.id) {
+              telegramIdToCheck = userObj.id.toString()
+            }
+          }
+        } catch (e) {
+          console.warn('Не удалось распарсить initData:', e)
+        }
+      }
+    } catch (e) {
+      console.warn('Не удалось получить telegramId из WebApp:', e)
+    }
+    
+    // Если не получили из WebApp, проверяем сохраненный в sessionStorage
+    if (!telegramIdToCheck) {
+      telegramIdToCheck = getTelegramId()
+    }
+    
+    if (telegramIdToCheck) {
+      // Сохраняем telegramId в sessionStorage, если его там еще нет
+      if (!getTelegramId()) {
+        setTelegramId(telegramIdToCheck)
+      }
+      // Если есть telegramId, загружаем пользователя по нему
       try {
-        const foundUser = await getUserByTelegramIdAction(savedTelegramId)
+        const foundUser = await getUserByTelegramIdAction(telegramIdToCheck)
         if (foundUser) {
           setUser(foundUser)
           
@@ -445,7 +478,7 @@ export const useUserStore = defineStore('user', () => {
           if (!accessToken.value && foundUser.activated) {
             try {
               const { loginByTelegramId } = await import('@/graphql/services/user')
-              const loginResult = await loginByTelegramId(savedTelegramId)
+              const loginResult = await loginByTelegramId(telegramIdToCheck)
               
               if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
                 const authData = loginResult.data.loginByTelegramId.data
