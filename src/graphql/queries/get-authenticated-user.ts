@@ -1,4 +1,5 @@
 import gql from 'graphql-tag'
+import { Specialization } from '../interface'
 
 export interface BlockReason {
   id: string
@@ -25,6 +26,7 @@ export interface User {
     description: string | null
   }
   blockReasons: BlockReason[]
+  specializations?: Specialization[]
   createdAt: string
   updatedAt: string
 }
@@ -64,6 +66,14 @@ export const GET_CURRENT_USER = gql`
           name
           description
           isActive
+        }
+        specializations {
+          id
+          name
+          description
+          type
+          createdAt
+          updatedAt
         }
         createdAt
         updatedAt

@@ -149,6 +149,7 @@ export const useUserStore = defineStore('user', () => {
           phone: userData.phone ?? null,
           role: userData.role,
           blockReasons: userData.blockReasons || [],
+          specializations: userData.specializations || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         })
@@ -205,6 +206,7 @@ export const useUserStore = defineStore('user', () => {
           phone: userData.phone ?? null,
           role: userData.role,
           blockReasons: userData.blockReasons || [],
+          specializations: userData.specializations || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         })
@@ -256,6 +258,7 @@ export const useUserStore = defineStore('user', () => {
           phone: userData.phone ?? null,
           role: userData.role,
           blockReasons: userData.blockReasons || [],
+          specializations: userData.specializations || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         }
@@ -317,6 +320,7 @@ export const useUserStore = defineStore('user', () => {
           phone: userData.phone ?? null,
           role: userData.role,
           blockReasons: userData.blockReasons || [],
+          specializations: userData.specializations || [],
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         }
@@ -508,6 +512,7 @@ export const useUserStore = defineStore('user', () => {
                   phone: userData.phone ?? null,
                   role: userData.role,
                   blockReasons: foundUser.blockReasons || [],
+                  specializations: userData.specializations || [],
                   createdAt: foundUser.createdAt,
                   updatedAt: foundUser.updatedAt
                 })

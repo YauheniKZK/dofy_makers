@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { NCard, NDescriptions, NDescriptionsItem, NTag, NAvatar, NDivider, NText, NButton, useMessage } from 'naive-ui'
 import { Person20Regular, Mail20Regular, Phone20Regular, Location20Regular, DocumentText20Regular, Briefcase20Regular, ShieldCheckmark20Regular } from '@vicons/fluent'
 import { sendToChannel } from '@/graphql/services/user'
+import SpecializationsManager from '@/components/SpecializationsManager.vue'
 
 const userStore = useUserStore()
 const { currentUserGetters } = storeToRefs(userStore)
@@ -189,6 +190,9 @@ const getInitials = (name: string | null | undefined) => {
           </div>
         </div>
       </n-card>
+
+      <!-- Специализации -->
+      <SpecializationsManager />
 
       <!-- Дополнительная информация -->
       <n-card title="Дополнительная информация">
