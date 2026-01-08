@@ -433,84 +433,253 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center h-full p-4">
+  <div class="start-page">
     <!-- Временная кнопка для тестирования -->
-    <div v-if="hasTestTelegramId" class="mb-4 max-w-md w-full">
+    <div v-if="hasTestTelegramId" class="test-button-wrapper">
       <n-button
         type="warning"
         :disabled="loading"
         @click="handleTestLogin"
         block
+        size="large"
+        class="test-button"
       >
         Тестовый вход (ID: {{ Config.MY_TELEGRAM_ID }})
       </n-button>
     </div>
     
     <n-spin :show="loading">
-      <div v-if="error" class="max-w-md w-full">
-        <n-card title="Ошибка">
-          <pre class="whitespace-pre-wrap text-red-500">{{ error }}</pre>
-        </n-card>
-      </div>
-      
-      <div v-else-if="showRegistration" class="max-w-md w-full">
-        <n-card title="Регистрация">
-          <div class="flex flex-col gap-4">
-            <p>Добро пожаловать! Вы еще не зарегистрированы в системе.</p>
-            <n-form :model="registrationForm">
-              <n-form-item label="Имя" path="firstName">
-                <n-input
-                  v-model:value="registrationForm.firstName"
-                  placeholder="Введите ваше имя"
-                  :disabled="createUserApiDataGetters.loading"
-                />
-              </n-form-item>
-              <n-form-item label="Фамилия" path="lastName">
-                <n-input
-                  v-model:value="registrationForm.lastName"
-                  placeholder="Введите вашу фамилию"
-                  :disabled="createUserApiDataGetters.loading"
-                />
-              </n-form-item>
-            </n-form>
+      <div class="auth-container">
+        <!-- Ошибка -->
+        <div v-if="error" class="auth-card error-card">
+          <div class="error-icon">⚠️</div>
+          <h2 class="auth-title">Ошибка</h2>
+          <pre class="error-message">{{ error }}</pre>
+        </div>
+        
+        <!-- Регистрация -->
+        <div v-else-if="showRegistration" class="auth-card">
+          <div class="auth-header">
+            <div class="auth-icon">👋</div>
+            <h2 class="auth-title">Добро пожаловать!</h2>
+            <p class="auth-subtitle">Заполните форму для регистрации</p>
+          </div>
+          <n-form :model="registrationForm" class="auth-form">
+            <n-form-item label="Имя" path="firstName">
+              <n-input
+                v-model:value="registrationForm.firstName"
+                placeholder="Введите ваше имя"
+                :disabled="createUserApiDataGetters.loading"
+                size="large"
+                round
+              />
+            </n-form-item>
+            <n-form-item label="Фамилия" path="lastName">
+              <n-input
+                v-model:value="registrationForm.lastName"
+                placeholder="Введите вашу фамилию"
+                :disabled="createUserApiDataGetters.loading"
+                size="large"
+                round
+              />
+            </n-form-item>
             <n-button
               type="primary"
               :loading="createUserApiDataGetters.loading"
               :disabled="createUserApiDataGetters.loading"
               @click="handleRegister"
               block
+              size="large"
+              round
+              class="auth-submit-button"
             >
               Зарегистрироваться
             </n-button>
+          </n-form>
+        </div>
+        
+        <!-- Активация -->
+        <div v-else-if="needsActivation && user" class="auth-card">
+          <div class="auth-header">
+            <div class="auth-icon">✨</div>
+            <h2 class="auth-title">Добро пожаловать, {{ user.name }}!</h2>
+            <p class="auth-subtitle">Для продолжения необходимо активировать ваш аккаунт</p>
           </div>
-        </n-card>
-      </div>
-      
-      <div v-else-if="needsActivation && user" class="max-w-md w-full">
-        <n-card title="Требуется активация">
-          <div class="flex flex-col gap-4">
-            <p>Добро пожаловать, {{ user.name }}!</p>
-            <p>Ваш аккаунт требует активации. Нажмите кнопку ниже для активации.</p>
-            <n-button
-              type="primary"
-              :loading="loading"
-              @click="handleActivate"
-              block
-            >
-              Активировать аккаунт
-            </n-button>
+          <n-button
+            type="primary"
+            :loading="loading"
+            @click="handleActivate"
+            block
+            size="large"
+            round
+            class="auth-submit-button"
+          >
+            Активировать аккаунт
+          </n-button>
+        </div>
+        
+        <!-- Загрузка -->
+        <div v-else class="auth-card">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Загрузка...</p>
           </div>
-        </n-card>
-      </div>
-      
-      <div v-else class="max-w-md w-full">
-        <n-card>
-          <p>Загрузка...</p>
-        </n-card>
+        </div>
       </div>
     </n-spin>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.start-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.test-button-wrapper {
+  max-width: 420px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.test-button {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.auth-container {
+  max-width: 420px;
+  width: 100%;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  border: 1px solid #e2e8f0;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.error-card {
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.auth-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.auth-form {
+  margin-top: 1.5rem;
+}
+
+.auth-submit-button {
+  margin-top: 1.5rem;
+  height: 48px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.3);
+}
+
+.auth-submit-button:hover {
+  box-shadow: 0 6px 12px -2px rgb(59 130 246 / 0.4);
+  transform: translateY(-1px);
+}
+
+.error-message {
+  white-space: pre-wrap;
+  color: #ef4444;
+  text-align: left;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:deep(.n-form-item-label) {
+  font-weight: 500;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+:deep(.n-input) {
+  border-radius: 10px;
+}
+
+:deep(.n-card) {
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+}
+</style>
 

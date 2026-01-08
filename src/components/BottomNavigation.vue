@@ -43,28 +43,78 @@ const navigate = (path: string) => {
 </script>
 
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[9999] safe-area-inset-bottom">
+  <nav class="bottom-nav-minimal safe-area-inset-bottom">
     <div class="flex justify-around items-center h-16 px-2">
       <button
         v-for="item in navItems"
         :key="item.path"
         @click="navigate(item.path)"
         :class="[
-          'flex flex-col items-center justify-center flex-1 h-full transition-colors',
-          isActive(item.path)
-            ? 'text-blue-600'
-            : 'text-gray-600 hover:text-gray-900'
+          'nav-item',
+          isActive(item.path) ? 'nav-item-active' : ''
         ]"
       >
-        <component :is="item.icon" :size="24" />
-        <span class="text-xs mt-1">{{ item.name }}</span>
+        <div class="nav-icon-wrapper">
+          <component :is="item.icon" :size="22" />
+        </div>
+        <span class="nav-label">{{ item.name }}</span>
       </button>
     </div>
   </nav>
 </template>
 
 <style scoped>
-.safe-area-inset-bottom {
+.bottom-nav-minimal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -1px 10px 0 rgb(0 0 0 / 0.05);
+  z-index: 9999;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  transition: all 0.2s ease;
+  color: #64748b;
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav-item:hover {
+  color: #3b82f6;
+}
+
+.nav-item-active {
+  color: #3b82f6;
+}
+
+.nav-item-active .nav-icon-wrapper {
+  transform: translateY(-2px);
+}
+
+.nav-icon-wrapper {
+  transition: transform 0.2s ease;
+  margin-bottom: 2px;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.nav-item-active .nav-label {
+  font-weight: 600;
 }
 </style>

@@ -98,153 +98,379 @@ const getInitials = (name: string | null | undefined) => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full overflow-y-auto p-4 pb-20">
-    <div v-if="user" class="max-w-2xl w-full mx-auto space-y-4">
+  <div class="profile-page">
+    <div v-if="user" class="profile-container">
       <!-- Заголовок профиля -->
-      <n-card>
-        <div class="flex items-center gap-4">
-          <n-avatar
-            :size="80"
-            round
-            :style="{ backgroundColor: '#18a058', fontSize: '32px' }"
-          >
-            {{ getInitials(user.name) }}
-          </n-avatar>
-          <div class="flex-1">
-            <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ user.name }}</h1>
-            <div class="flex items-center gap-2 flex-wrap">
-              <n-tag :type="user.activated ? 'success' : 'warning'" size="small">
+      <div class="profile-header-card">
+        <div class="profile-header-content">
+          <div class="profile-avatar-wrapper">
+            <n-avatar
+              :size="96"
+              round
+              class="profile-avatar"
+            >
+              {{ getInitials(user.name) }}
+            </n-avatar>
+            <div v-if="user.activated" class="status-badge status-active">
+              <ShieldCheckmark20Regular :size="14" />
+            </div>
+          </div>
+          <div class="profile-info">
+            <h1 class="profile-name">{{ user.name }}</h1>
+            <div class="profile-tags">
+              <n-tag :type="user.activated ? 'success' : 'warning'" size="small" round>
                 <template #icon>
                   <ShieldCheckmark20Regular />
                 </template>
                 {{ user.activated ? 'Активирован' : 'Требуется активация' }}
               </n-tag>
-              <n-tag type="info" size="small">
+              <n-tag type="info" size="small" round>
                 {{ user.role?.name || 'Пользователь' }}
               </n-tag>
             </div>
           </div>
         </div>
-      </n-card>
+      </div>
 
       <!-- Основная информация -->
-      <n-card title="Основная информация">
-        <n-descriptions :column="1" label-placement="left">
-          <n-descriptions-item label="Имя">
-            <n-text strong>{{ user.name }}</n-text>
-          </n-descriptions-item>
-          <n-descriptions-item v-if="user.email" label="Email">
-            <div class="flex items-center gap-2">
-              <Mail20Regular :size="16" />
-              <span>{{ user.email }}</span>
-            </div>
-          </n-descriptions-item>
-          <n-descriptions-item v-if="user.telegramId" label="Telegram ID">
-            <n-text type="info">{{ user.telegramId }}</n-text>
-          </n-descriptions-item>
-          <n-descriptions-item label="Роль">
-            <n-tag type="info">{{ user.role?.name || 'Не указано' }}</n-tag>
-          </n-descriptions-item>
-        </n-descriptions>
-      </n-card>
-
-      <!-- Контактная информация -->
-      <n-card v-if="user.phone || user.country || user.city" title="Контактная информация">
-        <n-descriptions :column="1" label-placement="left">
-          <n-descriptions-item v-if="user.phone" label="Телефон">
-            <div class="flex items-center gap-2">
-              <Phone20Regular :size="16" />
-              <span>{{ user.phone }}</span>
-            </div>
-          </n-descriptions-item>
-          <n-descriptions-item v-if="user.country || user.city" label="Местоположение">
-            <div class="flex items-center gap-2">
-              <Location20Regular :size="16" />
-              <span>
-                <template v-if="user.city">{{ user.city }}</template>
-                <template v-if="user.city && user.country">, </template>
-                <template v-if="user.country">{{ user.country }}</template>
-              </span>
-            </div>
-          </n-descriptions-item>
-        </n-descriptions>
-      </n-card>
-
-      <!-- Описание -->
-      <n-card v-if="user.shortDescription || user.description" title="О себе">
-        <div class="space-y-3">
-          <div v-if="user.shortDescription">
-            <div class="flex items-center gap-2 mb-2">
-              <Briefcase20Regular :size="16" />
-              <n-text strong>Краткое описание</n-text>
-            </div>
-            <n-text>{{ user.shortDescription }}</n-text>
+      <div class="info-card">
+        <h3 class="card-title">Основная информация</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-label">Имя</div>
+            <div class="info-value">{{ user.name }}</div>
           </div>
-          <n-divider v-if="user.shortDescription && user.description" />
-          <div v-if="user.description">
-            <div class="flex items-center gap-2 mb-2">
-              <DocumentText20Regular :size="16" />
-              <n-text strong>Описание</n-text>
+          <div v-if="user.email" class="info-item">
+            <div class="info-label">
+              <Mail20Regular :size="16" />
+              Email
             </div>
-            <n-text>{{ user.description }}</n-text>
+            <div class="info-value">{{ user.email }}</div>
+          </div>
+          <div v-if="user.telegramId" class="info-item">
+            <div class="info-label">Telegram ID</div>
+            <div class="info-value info-value-code">{{ user.telegramId }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Роль</div>
+            <div class="info-value">
+              <n-tag type="info" size="small" round>{{ user.role?.name || 'Не указано' }}</n-tag>
+            </div>
           </div>
         </div>
-      </n-card>
+      </div>
+
+      <!-- Контактная информация -->
+      <div v-if="user.phone || user.country || user.city" class="info-card">
+        <h3 class="card-title">Контактная информация</h3>
+        <div class="info-list">
+          <div v-if="user.phone" class="info-item">
+            <div class="info-label">
+              <Phone20Regular :size="16" />
+              Телефон
+            </div>
+            <div class="info-value">{{ user.phone }}</div>
+          </div>
+          <div v-if="user.country || user.city" class="info-item">
+            <div class="info-label">
+              <Location20Regular :size="16" />
+              Местоположение
+            </div>
+            <div class="info-value">
+              <template v-if="user.city">{{ user.city }}</template>
+              <template v-if="user.city && user.country">, </template>
+              <template v-if="user.country">{{ user.country }}</template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Описание -->
+      <div v-if="user.shortDescription || user.description" class="info-card">
+        <h3 class="card-title">О себе</h3>
+        <div class="description-content">
+          <div v-if="user.shortDescription" class="description-section">
+            <div class="description-header">
+              <Briefcase20Regular :size="18" />
+              <span>Краткое описание</span>
+            </div>
+            <p class="description-text">{{ user.shortDescription }}</p>
+          </div>
+          <div v-if="user.shortDescription && user.description" class="divider-minimal"></div>
+          <div v-if="user.description" class="description-section">
+            <div class="description-header">
+              <DocumentText20Regular :size="18" />
+              <span>Описание</span>
+            </div>
+            <p class="description-text">{{ user.description }}</p>
+          </div>
+        </div>
+      </div>
 
       <!-- Специализации -->
       <SpecializationsManager />
 
       <!-- Дополнительная информация -->
-      <n-card title="Дополнительная информация">
-        <n-descriptions :column="1" label-placement="left">
-          <n-descriptions-item label="Дата регистрации">
-            {{ formatDate(user.createdAt) }}
-          </n-descriptions-item>
-          <n-descriptions-item label="Последнее обновление">
-            {{ formatDate(user.updatedAt) }}
-          </n-descriptions-item>
-          <n-descriptions-item label="ID пользователя">
-            <n-text type="info" code>{{ user.id }}</n-text>
-          </n-descriptions-item>
-        </n-descriptions>
-      </n-card>
+      <div class="info-card">
+        <h3 class="card-title">Дополнительная информация</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-label">Дата регистрации</div>
+            <div class="info-value">{{ formatDate(user.createdAt) }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Последнее обновление</div>
+            <div class="info-value">{{ formatDate(user.updatedAt) }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">ID пользователя</div>
+            <div class="info-value info-value-code">{{ user.id }}</div>
+          </div>
+        </div>
+      </div>
 
       <!-- Тестовая кнопка отправки в канал -->
-      <n-card title="Тестирование">
-        <div class="flex flex-col gap-2">
-          <n-text>Отправить тестовое сообщение в канал Telegram</n-text>
+      <div class="info-card">
+        <h3 class="card-title">Тестирование</h3>
+        <div class="test-section">
+          <p class="test-description">Отправить тестовое сообщение в канал Telegram</p>
           <n-button
             type="primary"
             :loading="sendingMessage"
             :disabled="sendingMessage"
             @click="handleTestSend"
             block
+            size="large"
+            round
+            class="test-button"
           >
             Отправить тестовое сообщение
           </n-button>
         </div>
-      </n-card>
+      </div>
     </div>
 
-    <div v-else class="flex items-center justify-center h-full">
-      <n-card>
-        <div class="text-center text-gray-500">
-          <Person20Regular :size="48" class="mx-auto mb-2 opacity-50" />
-          <p>Информация о пользователе не загружена</p>
-        </div>
-      </n-card>
+    <div v-else class="empty-state">
+      <Person20Regular :size="64" class="empty-icon" />
+      <p class="empty-text">Информация о пользователе не загружена</p>
     </div>
   </div>
 </template>
 
 <style scoped>
-:deep(.n-descriptions-label) {
-  font-weight: 500;
-  color: #6b7280;
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  padding-bottom: 5rem;
+  background: #f8fafc;
 }
 
-:deep(.n-card-header) {
-  font-weight: 600;
+.profile-container {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.profile-header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px -5px rgb(102 126 234 / 0.3);
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.profile-header-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  background: #10b981;
+}
+
+.status-active {
+  background: #10b981;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.profile-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border-color: #cbd5e1;
+}
+
+.card-title {
   font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.info-value-code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  background: #f1f5f9;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  display: inline-block;
+  color: #475569;
+}
+
+.description-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.description-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.description-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.description-text {
+  color: #475569;
+  line-height: 1.7;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.divider-minimal {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0.5rem 0;
+}
+
+.test-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.test-description {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.test-button {
+  height: 44px;
+  font-weight: 600;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.empty-icon {
+  color: #cbd5e1;
+  opacity: 0.5;
+}
+
+.empty-text {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+:deep(.n-tag) {
+  border-radius: 12px;
+  font-weight: 500;
 }
 </style>

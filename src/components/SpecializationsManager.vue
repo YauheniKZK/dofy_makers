@@ -206,87 +206,95 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 
 <template>
   <div class="specializations-manager">
-    <n-card>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <Briefcase20Regular :size="20" />
-            <span class="font-semibold">Специализации</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <n-button
-              type="info"
-              size="small"
-              :disabled="isLoading"
-              @click="openCreateModal"
-            >
-              <template #icon>
-                <Add20Regular />
-              </template>
-              Создать свою
-            </n-button>
-            <n-button
-              type="primary"
-              size="small"
-              :disabled="availableToAdd.length === 0 || isLoading"
-              @click="openAddModal"
-            >
-              <template #icon>
-                <Add20Regular />
-              </template>
-              Добавить
-            </n-button>
-          </div>
+    <div class="specializations-card">
+      <div class="specializations-header">
+        <div class="header-left">
+          <Briefcase20Regular :size="22" class="header-icon" />
+          <h3 class="header-title">Специализации</h3>
         </div>
-      </template>
+        <div class="header-actions">
+          <n-button
+            type="info"
+            size="small"
+            :disabled="isLoading"
+            @click="openCreateModal"
+            round
+            class="action-button"
+          >
+            <template #icon>
+              <Add20Regular />
+            </template>
+            Создать свою
+          </n-button>
+          <n-button
+            type="primary"
+            size="small"
+            :disabled="availableToAdd.length === 0 || isLoading"
+            @click="openAddModal"
+            round
+            class="action-button"
+          >
+            <template #icon>
+              <Add20Regular />
+            </template>
+            Добавить
+          </n-button>
+        </div>
+      </div>
 
       <n-spin :show="isLoading">
-        <div v-if="userSpecializations.length > 0" class="space-y-2">
-          <div
-            v-for="spec in userSpecializations"
-            :key="spec.id"
-            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <n-text strong>{{ spec.name }}</n-text>
-                <n-tag :type="getSpecializationTypeColor(spec.type)" size="small">
-                  {{ getSpecializationTypeLabel(spec.type) }}
-                </n-tag>
-              </div>
-              <n-text v-if="spec.description" depth="3" class="text-sm">
-                {{ spec.description }}
-              </n-text>
-            </div>
-            <n-popconfirm
-              positive-text="Удалить"
-              negative-text="Отмена"
-              @positive-click="handleRemoveSpecialization(spec.id)"
+        <div class="specializations-content">
+          <div v-if="userSpecializations.length > 0" class="specializations-list">
+            <div
+              v-for="spec in userSpecializations"
+              :key="spec.id"
+              class="specialization-item"
             >
-              <template #trigger>
-                <n-button
-                  type="error"
-                  size="small"
-                  :loading="isDetaching"
-                  :disabled="isDetaching || isLoading"
-                  quaternary
-                >
-                  <template #icon>
-                    <Dismiss20Regular />
-                  </template>
-                </n-button>
-              </template>
-              Вы уверены, что хотите удалить специализацию "{{ spec.name }}"?
-            </n-popconfirm>
+              <div class="specialization-content">
+                <div class="specialization-header-row">
+                  <span class="specialization-name">{{ spec.name }}</span>
+                  <n-tag :type="getSpecializationTypeColor(spec.type)" size="small" round>
+                    {{ getSpecializationTypeLabel(spec.type) }}
+                  </n-tag>
+                </div>
+                <p v-if="spec.description" class="specialization-description">
+                  {{ spec.description }}
+                </p>
+              </div>
+              <n-popconfirm
+                positive-text="Удалить"
+                negative-text="Отмена"
+                @positive-click="handleRemoveSpecialization(spec.id)"
+              >
+                <template #trigger>
+                  <n-button
+                    type="error"
+                    size="small"
+                    :loading="isDetaching"
+                    :disabled="isDetaching || isLoading"
+                    quaternary
+                    round
+                    class="remove-button"
+                  >
+                    <template #icon>
+                      <Dismiss20Regular />
+                    </template>
+                  </n-button>
+                </template>
+                Вы уверены, что хотите удалить специализацию "{{ spec.name }}"?
+              </n-popconfirm>
+            </div>
           </div>
-        </div>
 
-        <n-empty v-else description="У вас пока нет специализаций">
-          <template #extra>
-            <div class="flex gap-2 justify-center">
+          <div v-else class="empty-specializations">
+            <div class="empty-icon">💼</div>
+            <p class="empty-text">У вас пока нет специализаций</p>
+            <div class="empty-actions">
               <n-button
                 type="info"
                 @click="openCreateModal"
+                round
+                size="medium"
               >
                 Создать свою
               </n-button>
@@ -294,14 +302,16 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
                 type="primary"
                 :disabled="availableToAdd.length === 0"
                 @click="openAddModal"
+                round
+                size="medium"
               >
                 Добавить существующую
               </n-button>
             </div>
-          </template>
-        </n-empty>
+          </div>
+        </div>
       </n-spin>
-    </n-card>
+    </div>
 
     <!-- Модальное окно добавления существующей специализации -->
     <n-modal
@@ -399,5 +409,144 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 <style scoped>
 .specializations-manager {
   width: 100%;
+}
+
+.specializations-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.specializations-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border-color: #cbd5e1;
+}
+
+.specializations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon {
+  color: #3b82f6;
+}
+
+.header-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  font-weight: 500;
+}
+
+.specializations-content {
+  min-height: 100px;
+}
+
+.specializations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.specialization-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.specialization-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(4px);
+}
+
+.specialization-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.specialization-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.specialization-name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.specialization-description {
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.remove-button {
+  flex-shrink: 0;
+}
+
+.empty-specializations {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-text {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+:deep(.n-tag) {
+  border-radius: 12px;
+  font-weight: 500;
 }
 </style>
