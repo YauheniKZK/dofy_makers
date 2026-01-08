@@ -282,6 +282,11 @@ export const useSpecializationStore = defineStore('specialization', () => {
           systemSpecializations.value.push(specialization)
         } else {
           patientSpecializations.value.push(specialization)
+          // Пользовательские специализации автоматически привязываются к создателю
+          // Добавляем в список специализаций текущего пользователя
+          if (!currentUserSpecializations.value.find(s => s.id === specialization.id)) {
+            currentUserSpecializations.value.push(specialization)
+          }
         }
         
         return specialization
