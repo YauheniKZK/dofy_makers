@@ -18,7 +18,8 @@ import {
 import type { Specialization } from '@/graphql/interface'
 import type { CreateSpecializationInput } from '@/graphql/mutations/create-specialization'
 import type { UpdateSpecializationInput } from '@/graphql/mutations/update-specialization'
-import type { AttachSpecializationToUserInput, DetachSpecializationFromUserInput } from '@/graphql/mutations/attach-specialization-to-user'
+import type { AttachSpecializationToUserInput } from '@/graphql/mutations/attach-specialization-to-user'
+import type { DetachSpecializationFromUserInput } from '@/graphql/mutations/detach-specialization-from-user'
 
 // Универсальный интерфейс для состояния запроса
 interface ApiState<T = any> {

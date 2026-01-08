@@ -53,9 +53,8 @@ const availableToAdd = computed(() => {
 // Опции для селекта
 const specializationOptions = computed(() => {
   return availableToAdd.value.map(spec => ({
-    label: spec.name,
-    value: spec.id,
-    description: spec.description
+    label: spec.description ? `${spec.name} - ${spec.description}` : spec.name,
+    value: spec.id
   }))
 })
 
@@ -241,16 +240,7 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
             filterable
             :loading="isLoading"
             :disabled="isLoading || availableToAdd.length === 0"
-          >
-            <template #option="{ label, description }">
-              <div>
-                <div>{{ label }}</div>
-                <n-text v-if="description" depth="3" class="text-xs">
-                  {{ description }}
-                </n-text>
-              </div>
-            </template>
-          </n-select>
+          />
         </n-form-item>
       </n-form>
 
