@@ -41,7 +41,7 @@ defineProps({
     :bordered="false"
     :closable="false"
     class="custom1-card"
-    style="padding-bottom: 15px; border-radius: 8px"
+    style="padding-bottom: 15px"
     :style="`max-width: ${maxWidth}; width: ${width}`"
     :content-style="`padding-left: ${px};padding-right: ${px};padding-top: 0;padding-bottom: ${py};max-height: 100%`"
     :header-style="'padding-left: 16px;padding-right: 16px;padding-bottom: 0;'"

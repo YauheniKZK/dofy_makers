@@ -8,20 +8,20 @@
   >
     <div class="flex items-center justify-between h-full">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-          <span class="text-white text-sm font-bold">D</span>
+        <div class="header-logo">
+          <span class="logo-text">D</span>
         </div>
-        <span class="text-sm font-medium text-gray-700 hidden sm:block">DofyMaster</span>
+        <span class="header-title">DofyMaster</span>
       </div>
       <div class="flex items-center gap-3">
         <div class="text-right hidden sm:block">
-          <div class="text-sm font-medium text-gray-900">{{ currentUserGetters?.name || 'Пользователь' }}</div>
-          <div v-if="currentUserGetters?.role" class="text-xs text-gray-500">
+          <div class="user-name">{{ currentUserGetters?.name || 'Пользователь' }}</div>
+          <div v-if="currentUserGetters?.role" class="user-role">
             {{ currentUserGetters.role.name }}
           </div>
         </div>
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-          <span class="text-white text-xs font-semibold">
+        <div class="header-avatar">
+          <span class="avatar-text">
             {{ getInitials(currentUserGetters?.name) }}
           </span>
         </div>
@@ -53,9 +53,56 @@ const getInitials = (name: string | null | undefined) => {
 
 <style scoped>
 .header-minimal {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  background: #CFBB99;
+  border-bottom: 2px solid #B5A082;
+}
+
+.header-logo {
+  width: 32px;
+  height: 32px;
+  background: #354024;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4C3E19;
+}
+
+.logo-text {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #4C3E19;
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  background: #354024;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4C3E19;
+}
+
+.avatar-text {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
 }
 </style>

@@ -47,7 +47,7 @@
   min-height: 100%;
   padding: 1.5rem 1rem;
   padding-bottom: 5rem;
-  background: #f8fafc;
+  background: #E5D7C4;
 }
 
 .statistics-header {
@@ -60,13 +60,13 @@
 .page-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: #4C3E19;
   margin: 0;
 }
 
@@ -86,11 +86,9 @@
 }
 
 .stat-card-large {
-  background: white;
-  border-radius: 16px;
+  background: #CFBB99;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
+  border: 2px solid #B5A082;
 }
 
 .stat-card-header {
@@ -102,19 +100,19 @@
 .stat-card-icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
+  border: 2px solid #354024;
 }
 
 .stat-icon-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: #354024;
 }
 
 .stat-icon-green {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #889063;
 }
 
 .stat-card-info {
@@ -123,40 +121,38 @@
 
 .stat-card-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: #4C3E19;
   margin-bottom: 0.25rem;
 }
 
 .stat-card-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1A1A1A;
 }
 
 .empty-statistics {
-  background: white;
-  border-radius: 20px;
+  background: #CFBB99;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
+  border: 2px solid #B5A082;
 }
 
 .empty-icon {
   font-size: 4rem;
   margin-bottom: 1.5rem;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .empty-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 0.5rem;
 }
 
 .empty-description {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.95rem;
   margin: 0;
 }

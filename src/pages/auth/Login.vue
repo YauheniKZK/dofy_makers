@@ -71,7 +71,6 @@ watch(() => loginApiDataGetters.value.error, (error) => {
         {{ errorMessage }}
       </div>
       <n-button
-        round
         type="primary"
         :loading="loginApiDataGetters.loading"
         :disabled="loginApiDataGetters.loading"

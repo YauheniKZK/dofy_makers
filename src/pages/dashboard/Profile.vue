@@ -241,7 +241,6 @@ const getInitials = (name: string | null | undefined) => {
             @click="handleTestSend"
             block
             size="large"
-            round
             class="test-button"
           >
             Отправить тестовое сообщение
@@ -265,7 +264,7 @@ const getInitials = (name: string | null | undefined) => {
   overflow-y: auto;
   padding: 1.5rem 1rem;
   padding-bottom: 5rem;
-  background: #f8fafc;
+  background: #E5D7C4;
 }
 
 .profile-container {
@@ -278,11 +277,10 @@ const getInitials = (name: string | null | undefined) => {
 }
 
 .profile-header-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
+  background: #4C3E19;
   padding: 2rem;
-  box-shadow: 0 10px 25px -5px rgb(102 126 234 / 0.3);
-  color: white;
+  border: 2px solid #354024;
+  color: #FFFFFF;
   margin-bottom: 0.5rem;
 }
 
@@ -297,11 +295,11 @@ const getInitials = (name: string | null | undefined) => {
 }
 
 .profile-avatar {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  background: #E5D7C4;
+  border: 2px solid #FFFFFF;
   font-weight: 700;
   font-size: 2rem;
+  color: #1A1A1A;
 }
 
 .status-badge {
@@ -310,16 +308,15 @@ const getInitials = (name: string | null | undefined) => {
   right: 0;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid white;
-  background: #10b981;
+  border: 2px solid #FFFFFF;
+  background: #889063;
 }
 
 .status-active {
-  background: #10b981;
+  background: #889063;
 }
 
 .profile-info {
@@ -330,7 +327,7 @@ const getInitials = (name: string | null | undefined) => {
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
-  color: white;
+  color: #FFFFFF;
 }
 
 .profile-tags {
@@ -340,26 +337,24 @@ const getInitials = (name: string | null | undefined) => {
 }
 
 .info-card {
-  background: white;
-  border-radius: 16px;
+  background: #CFBB99;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  border: 2px solid #B5A082;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .info-card:hover {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  border-color: #cbd5e1;
+  background: #C0AB88;
+  border-color: #354024;
 }
 
 .card-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid #B5A082;
 }
 
 .info-list {
@@ -377,7 +372,7 @@ const getInitials = (name: string | null | undefined) => {
 .info-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: #4C3E19;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -385,18 +380,18 @@ const getInitials = (name: string | null | undefined) => {
 
 .info-value {
   font-size: 1rem;
-  color: #0f172a;
+  color: #1A1A1A;
   font-weight: 500;
 }
 
 .info-value-code {
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 0.875rem;
-  background: #f1f5f9;
+  background: #E5D7C4;
   padding: 0.375rem 0.75rem;
-  border-radius: 6px;
+  border: 2px solid #B5A082;
   display: inline-block;
-  color: #475569;
+  color: #4C3E19;
 }
 
 .description-content {
@@ -416,20 +411,20 @@ const getInitials = (name: string | null | undefined) => {
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   font-size: 0.95rem;
 }
 
 .description-text {
-  color: #475569;
+  color: #4C3E19;
   line-height: 1.7;
   margin: 0;
   font-size: 0.95rem;
 }
 
 .divider-minimal {
-  height: 1px;
-  background: #e2e8f0;
+  height: 2px;
+  background: #B5A082;
   margin: 0.5rem 0;
 }
 
@@ -440,7 +435,7 @@ const getInitials = (name: string | null | undefined) => {
 }
 
 .test-description {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -448,6 +443,14 @@ const getInitials = (name: string | null | undefined) => {
 .test-button {
   height: 44px;
   font-weight: 600;
+  background: #354024;
+  border: 2px solid #354024;
+  color: #FFFFFF;
+}
+
+.test-button:hover {
+  background: #4C3E19;
+  border-color: #4C3E19;
 }
 
 .empty-state {
@@ -460,17 +463,32 @@ const getInitials = (name: string | null | undefined) => {
 }
 
 .empty-icon {
-  color: #cbd5e1;
-  opacity: 0.5;
+  color: #889063;
+  opacity: 0.7;
 }
 
 .empty-text {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 1rem;
 }
 
 :deep(.n-tag) {
-  border-radius: 12px;
+  border: 2px solid #B5A082;
   font-weight: 500;
+}
+
+:deep(.n-button) {
+  border: 2px solid;
+}
+
+:deep(.n-button--primary-type) {
+  background: #354024;
+  border-color: #354024;
+  color: #FFFFFF;
+}
+
+:deep(.n-button--primary-type:hover) {
+  background: #4C3E19;
+  border-color: #4C3E19;
 }
 </style>

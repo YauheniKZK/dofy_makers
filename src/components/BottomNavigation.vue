@@ -69,10 +69,8 @@ const navigate = (path: string) => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -1px 10px 0 rgb(0 0 0 / 0.05);
+  background: #CFBB99;
+  border-top: 2px solid #B5A082;
   z-index: 9999;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -84,26 +82,26 @@ const navigate = (path: string) => {
   justify-content: center;
   flex: 1;
   height: 100%;
-  transition: all 0.2s ease;
-  color: #64748b;
+  transition: background-color 0.2s ease;
+  color: #4C3E19;
   position: relative;
   padding: 4px 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .nav-item:hover {
-  color: #3b82f6;
+  background: #C0AB88;
+  color: #354024;
 }
 
 .nav-item-active {
-  color: #3b82f6;
-}
-
-.nav-item-active .nav-icon-wrapper {
-  transform: translateY(-2px);
+  color: #354024;
+  background: #B5A082;
 }
 
 .nav-icon-wrapper {
-  transition: transform 0.2s ease;
   margin-bottom: 2px;
 }
 
@@ -111,7 +109,6 @@ const navigate = (path: string) => {
   font-size: 11px;
   font-weight: 500;
   margin-top: 2px;
-  transition: all 0.2s ease;
 }
 
 .nav-item-active .nav-label {

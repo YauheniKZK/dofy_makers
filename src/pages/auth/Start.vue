@@ -471,7 +471,6 @@ onMounted(() => {
                 placeholder="Введите ваше имя"
                 :disabled="createUserApiDataGetters.loading"
                 size="large"
-                round
               />
             </n-form-item>
             <n-form-item label="Фамилия" path="lastName">
@@ -480,7 +479,6 @@ onMounted(() => {
                 placeholder="Введите вашу фамилию"
                 :disabled="createUserApiDataGetters.loading"
                 size="large"
-                round
               />
             </n-form-item>
             <n-button
@@ -490,7 +488,6 @@ onMounted(() => {
               @click="handleRegister"
               block
               size="large"
-              round
               class="auth-submit-button"
             >
               Зарегистрироваться
@@ -511,7 +508,6 @@ onMounted(() => {
             @click="handleActivate"
             block
             size="large"
-            round
             class="auth-submit-button"
           >
             Активировать аккаунт
@@ -538,7 +534,7 @@ onMounted(() => {
   justify-content: center;
   min-height: 100vh;
   padding: 2rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #E5D7C4;
 }
 
 .test-button-wrapper {
@@ -548,7 +544,7 @@ onMounted(() => {
 }
 
 .test-button {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border: 2px solid #4C3E19;
 }
 
 .auth-container {
@@ -557,11 +553,9 @@ onMounted(() => {
 }
 
 .auth-card {
-  background: white;
-  border-radius: 20px;
+  background: #CFBB99;
   padding: 2.5rem 2rem;
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
-  border: 1px solid #e2e8f0;
+  border: 2px solid #B5A082;
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -588,12 +582,12 @@ onMounted(() => {
 .auth-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 0.5rem;
 }
 
 .auth-subtitle {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.95rem;
   margin: 0;
 }
@@ -607,21 +601,23 @@ onMounted(() => {
   height: 48px;
   font-weight: 600;
   font-size: 1rem;
-  box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.3);
+  background: #354024;
+  border: 2px solid #354024;
+  color: #FFFFFF;
 }
 
 .auth-submit-button:hover {
-  box-shadow: 0 6px 12px -2px rgb(59 130 246 / 0.4);
-  transform: translateY(-1px);
+  background: #4C3E19;
+  border-color: #4C3E19;
 }
 
 .error-message {
   white-space: pre-wrap;
-  color: #ef4444;
+  color: #1A1A1A;
   text-align: left;
-  background: #fef2f2;
+  background: #E5D7C4;
   padding: 1rem;
-  border-radius: 8px;
+  border: 2px solid #B5A082;
   font-size: 0.9rem;
   line-height: 1.6;
   margin-top: 1rem;
@@ -638,15 +634,14 @@ onMounted(() => {
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
+  border: 4px solid #CFBB99;
+  border-top-color: #354024;
   animation: spin 0.8s linear infinite;
   margin-bottom: 1rem;
 }
 
 .loading-text {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.95rem;
 }
 
@@ -669,17 +664,22 @@ onMounted(() => {
 
 :deep(.n-form-item-label) {
   font-weight: 500;
-  color: #475569;
+  color: #4C3E19;
   font-size: 0.9rem;
 }
 
 :deep(.n-input) {
-  border-radius: 10px;
+  border: 2px solid #B5A082;
+  background: #E5D7C4;
+}
+
+:deep(.n-input:focus) {
+  border-color: #354024;
 }
 
 :deep(.n-card) {
-  border-radius: 20px;
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+  border: 2px solid #B5A082;
+  background: #CFBB99;
 }
 </style>
 

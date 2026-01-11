@@ -218,7 +218,6 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
             size="small"
             :disabled="isLoading"
             @click="openCreateModal"
-            round
             class="action-button"
           >
             <template #icon>
@@ -231,7 +230,6 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
             size="small"
             :disabled="availableToAdd.length === 0 || isLoading"
             @click="openAddModal"
-            round
             class="action-button"
           >
             <template #icon>
@@ -273,7 +271,6 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
                     :loading="isDetaching"
                     :disabled="isDetaching || isLoading"
                     quaternary
-                    round
                     class="remove-button"
                   >
                     <template #icon>
@@ -293,7 +290,6 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
               <n-button
                 type="info"
                 @click="openCreateModal"
-                round
                 size="medium"
               >
                 Создать свою
@@ -302,7 +298,6 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
                 type="primary"
                 :disabled="availableToAdd.length === 0"
                 @click="openAddModal"
-                round
                 size="medium"
               >
                 Добавить существующую
@@ -412,17 +407,15 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 }
 
 .specializations-card {
-  background: white;
-  border-radius: 16px;
+  background: #CFBB99;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  border: 2px solid #B5A082;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .specializations-card:hover {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  border-color: #cbd5e1;
+  background: #C0AB88;
+  border-color: #354024;
 }
 
 .specializations-header {
@@ -431,7 +424,7 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid #B5A082;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -443,13 +436,13 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 }
 
 .header-icon {
-  color: #3b82f6;
+  color: #354024;
 }
 
 .header-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   margin: 0;
 }
 
@@ -461,6 +454,7 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 
 .action-button {
   font-weight: 500;
+  border: 2px solid;
 }
 
 .specializations-content {
@@ -479,16 +473,14 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  background: #E5D7C4;
+  border: 2px solid #B5A082;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .specialization-item:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  transform: translateX(4px);
+  background: #CFBB99;
+  border-color: #354024;
 }
 
 .specialization-content {
@@ -506,12 +498,12 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 
 .specialization-name {
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   font-size: 1rem;
 }
 
 .specialization-description {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 0;
@@ -519,6 +511,7 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 
 .remove-button {
   flex-shrink: 0;
+  border: 2px solid;
 }
 
 .empty-specializations {
@@ -529,11 +522,11 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .empty-text {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
 }
@@ -546,7 +539,33 @@ const getSpecializationTypeColor = (type: 'system' | 'patient') => {
 }
 
 :deep(.n-tag) {
-  border-radius: 12px;
+  border: 2px solid #B5A082;
   font-weight: 500;
+}
+
+:deep(.n-button) {
+  border: 2px solid;
+}
+
+:deep(.n-button--primary-type) {
+  background: #354024;
+  border-color: #354024;
+  color: #FFFFFF;
+}
+
+:deep(.n-button--primary-type:hover) {
+  background: #4C3E19;
+  border-color: #4C3E19;
+}
+
+:deep(.n-button--info-type) {
+  background: #889063;
+  border-color: #889063;
+  color: #FFFFFF;
+}
+
+:deep(.n-button--info-type:hover) {
+  background: #7A8054;
+  border-color: #7A8054;
 }
 </style>

@@ -25,7 +25,7 @@
   min-height: 100%;
   padding: 1.5rem 1rem;
   padding-bottom: 5rem;
-  background: #f8fafc;
+  background: #E5D7C4;
 }
 
 .catalog-header {
@@ -38,13 +38,13 @@
 .page-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
   font-size: 1rem;
-  color: #64748b;
+  color: #4C3E19;
   margin: 0;
 }
 
@@ -55,29 +55,27 @@
 }
 
 .empty-catalog {
-  background: white;
-  border-radius: 20px;
+  background: #CFBB99;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
+  border: 2px solid #B5A082;
 }
 
 .empty-icon {
   font-size: 4rem;
   margin-bottom: 1.5rem;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .empty-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1A1A1A;
   margin-bottom: 0.5rem;
 }
 
 .empty-description {
-  color: #64748b;
+  color: #4C3E19;
   font-size: 0.95rem;
   margin: 0;
 }

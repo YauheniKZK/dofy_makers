@@ -1,28 +1,34 @@
 @import "tailwindcss";
 
-/* Минималистичная цветовая палитра */
+/* Flat Design цветовая палитра */
 :root {
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-light: #eff6ff;
-  --color-secondary: #64748b;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-background: #ffffff;
-  --color-surface: #f8fafc;
-  --color-surface-hover: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-text-tertiary: #94a3b8;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* Основная палитра */
+  --color-accent-primary: #4C3E19;
+  --color-accent-secondary: #354024;
+  --color-neutral: #889063;
+  --color-surface-card: #CFBB99;
+  --color-background-main: #E5D7C4;
+  
+  /* Дополнительные цвета для интерфейса */
+  --color-background: #E5D7C4;
+  --color-surface: #CFBB99;
+  --color-surface-hover: #C0AB88;
+  --color-border: #B5A082;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4C3E19;
+  --color-text-tertiary: #6B5D3F;
+  --color-text-on-accent: #FFFFFF;
+  
+  /* Плоский дизайн - без теней */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  
+  /* Плоские скругления - минимальные */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 }
 
 * {
@@ -87,25 +93,16 @@ h3 {
   background: var(--color-text-tertiary);
 }
 
-/* Утилиты для минималистичного дизайна */
-.card-minimal {
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+/* Утилиты для Flat Design */
+.card-flat {
+  background: var(--color-surface-card);
+  border: 2px solid var(--color-border);
   padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
 }
 
-.card-minimal:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-light);
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.card-flat:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent-secondary);
 }
 
 /* Анимации */
