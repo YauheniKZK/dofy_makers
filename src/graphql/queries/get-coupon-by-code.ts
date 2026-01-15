@@ -7,6 +7,8 @@ export interface CouponUser {
 
 export interface Coupon {
   id: string
+  userId: string
+  user?: CouponUser
   code: string
   type: string
   value: number
@@ -17,7 +19,8 @@ export interface Coupon {
   usageCount: number
   maxUsage: number | null
   isActive: boolean
-  user?: CouponUser
+  createdAt: string
+  updatedAt: string
 }
 
 export interface GetCouponByCodeResult {
@@ -37,6 +40,11 @@ export const GET_COUPON_BY_CODE = gql`
       message
       data {
         id
+        userId
+        user {
+          id
+          name
+        }
         code
         type
         value
@@ -47,10 +55,8 @@ export const GET_COUPON_BY_CODE = gql`
         usageCount
         maxUsage
         isActive
-        user {
-          id
-          name
-        }
+        createdAt
+        updatedAt
       }
     }
   }

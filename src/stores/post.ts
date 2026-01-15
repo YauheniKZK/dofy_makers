@@ -117,7 +117,7 @@ export const usePostStore = defineStore('post', () => {
       const response = await getPost(id)
 
       if (response.data?.post?.successfully && response.data.post.data) {
-        const post = response.data.post.data
+        const post = response.data.post.data as Post
         currentPost.value = post
         getPostApiData.value.data = post
         getPostApiData.value.success = true

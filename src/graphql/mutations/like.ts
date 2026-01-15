@@ -12,6 +12,7 @@ export interface Like {
   likeableType: string
   likeableId: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface LikeInput {
@@ -44,6 +45,7 @@ export const LIKE = gql`
         likeableType
         likeableId
         createdAt
+        updatedAt
       }
     }
   }

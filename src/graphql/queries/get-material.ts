@@ -15,6 +15,8 @@ export interface Material {
   slug: string
   sortOrder: number
   isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface GetMaterialResult {
@@ -45,6 +47,8 @@ export const GET_MATERIAL = gql`
         slug
         sortOrder
         isActive
+        createdAt
+        updatedAt
       }
     }
   }
