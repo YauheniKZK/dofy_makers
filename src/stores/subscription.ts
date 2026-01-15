@@ -9,6 +9,8 @@ import {
   unsubscribe
 } from '@/graphql/services/subscription'
 import type { Subscription } from '@/graphql/queries/get-subscriptions'
+import type { Subscription as SubscriptionFromSubscribe } from '@/graphql/mutations/subscribe'
+import type { Subscription as SubscriptionFromGetSubscribers } from '@/graphql/queries/get-subscribers'
 import type { SubscribeInput } from '@/graphql/mutations/subscribe'
 
 // Универсальный интерфейс для состояния запроса
@@ -50,7 +52,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
   const getSubscriptionApiData = ref<ApiState<Subscription>>(createDefaultApiState<Subscription>())
   const getSubscribersApiData = ref<ApiState<{ subscriptions: Subscription[]; total: number }>>(createDefaultApiState<{ subscriptions: Subscription[]; total: number }>())
   const isSubscribedApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
-  const subscribeApiData = ref<ApiState<Subscription>>(createDefaultApiState<Subscription>())
+  const subscribeApiData = ref<ApiState<Subscription | SubscriptionFromSubscribe>>(createDefaultApiState<Subscription | SubscriptionFromSubscribe>())
   const unsubscribeApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
 
   // -----------------GETTERS---------------------
@@ -138,8 +140,8 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
       if (response.data?.subscribers?.successfully && response.data.subscribers.data) {
         const data = response.data.subscribers.data
-        subscribers.value = data.subscriptions
-        getSubscribersApiData.value.data = data
+        subscribers.value = data.subscriptions as any as Subscription[]
+        getSubscribersApiData.value.data = { subscriptions: data.subscriptions as any as Subscription[], total: data.total }
         getSubscribersApiData.value.success = true
         getSubscribersApiData.value.message = response.data.subscribers.message || 'Подписчики загружены'
       } else {
@@ -197,14 +199,14 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
       if (response.data?.subscribe?.successfully && response.data.subscribe.data) {
         const subscription = response.data.subscribe.data
-        subscribeApiData.value.data = subscription
+        subscribeApiData.value.data = subscription as any as Subscription | SubscriptionFromSubscribe
         subscribeApiData.value.success = true
         subscribeApiData.value.message = response.data.subscribe.message || 'Подписка создана'
         
         // Добавляем в список подписок
-        subscriptions.value.push(subscription)
+        subscriptions.value.push(subscription as any as Subscription)
         
-        return subscription
+        return subscription as any as Subscription
       } else {
         const errorMsg = response.data?.subscribe?.error || response.data?.subscribe?.message || 'Ошибка создания подписки'
         subscribeApiData.value.error = true

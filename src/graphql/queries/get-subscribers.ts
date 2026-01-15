@@ -13,6 +13,7 @@ export interface Subscription {
   followingId: string
   following?: SubscriberUser
   createdAt: string
+  updatedAt: string
 }
 
 export interface GetSubscribersResult {
@@ -48,6 +49,7 @@ export const GET_SUBSCRIBERS = gql`
             name
           }
           createdAt
+          updatedAt
         }
         total
       }

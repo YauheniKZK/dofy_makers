@@ -12,6 +12,7 @@ export interface Subscription {
   followingId: string
   following?: SubscribeUser
   createdAt: string
+  updatedAt: string
 }
 
 export interface SubscribeInput {
@@ -46,6 +47,7 @@ export const SUBSCRIBE = gql`
           name
         }
         createdAt
+        updatedAt
       }
     }
   }

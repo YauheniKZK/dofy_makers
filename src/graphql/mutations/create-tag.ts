@@ -17,6 +17,7 @@ export interface CreatedTag {
   slug: string
   isActive: boolean
   createdAt: string
+  updatedAt: string
 }
 
 export interface CreateTagResult {
@@ -42,6 +43,7 @@ export const CREATE_TAG = gql`
         slug
         isActive
         createdAt
+        updatedAt
       }
     }
   }

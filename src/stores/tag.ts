@@ -8,7 +8,7 @@ import {
 } from '@/graphql/services/tag'
 import type { Tag } from '@/graphql/queries/get-tags'
 import type { TagSuggestion } from '@/graphql/queries/get-tag-suggestions'
-import type { CreateTagInput } from '@/graphql/mutations/create-tag'
+import type { CreateTagInput, CreatedTag } from '@/graphql/mutations/create-tag'
 
 // Универсальный интерфейс для состояния запроса
 interface ApiState<T = any> {
@@ -159,14 +159,14 @@ export const useTagStore = defineStore('tag', () => {
 
       if (response.data?.createTag?.successfully && response.data.createTag.data) {
         const tag = response.data.createTag.data
-        createTagApiData.value.data = tag
+        createTagApiData.value.data = tag as any as Tag
         createTagApiData.value.success = true
         createTagApiData.value.message = response.data.createTag.message || 'Тег создан'
         
         // Добавляем в список тегов
-        tags.value.push(tag)
+        tags.value.push(tag as any as Tag)
         
-        return tag
+        return tag as any as Tag
       } else {
         const errorMsg = response.data?.createTag?.error || response.data?.createTag?.message || 'Ошибка создания тега'
         createTagApiData.value.error = true
