@@ -14,6 +14,7 @@ export interface User {
   email: string | null
   telegramId: string | null
   activated: boolean
+  avatarUrl: string | null
   description: string | null
   shortDescription: string | null
   country: string | null
@@ -51,6 +52,7 @@ export const GET_CURRENT_USER = gql`
         email
         telegramId
         activated
+        avatarUrl
         description
         shortDescription
         country

@@ -21,20 +21,23 @@ const navItems = [
   },
   {
     name: 'Мастерская',
-    path: '/',
-    key: 'catalog',
+    path: '/workshop',
+    key: 'workshop',
     icon: ToolKit
   },
   {
     name: 'Профиль',
-    path: '/',
+    path: '/profile',
     key: 'profile',
     icon: Person20Regular
   }
 ]
 
 const navigate = (value: string) => {
-  router.push({ path: value })
+  const item = navItems.find(item => item.key === value)
+  if (item) {
+    router.push({ path: item.path })
+  }
 }
 
 </script>

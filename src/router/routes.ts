@@ -30,7 +30,49 @@ export default () => {
       meta: {
         requiresAuth: true
       },
-      component: () => import('../pages/knowledge/Knowledge.vue')
+      redirect: '/knowledge/main',
+      component: () => import('../pages/knowledge/Index.vue'),
+      children: [
+        {
+          path: '/knowledge/main',
+          name: 'knowledge-main',
+          component: () => import('../pages/knowledge/Main.vue')
+        },
+        {
+          path: 'manual',
+          name: 'manual',
+          component: () => import('../pages/knowledge/Manual.vue')
+        },
+        {
+          path: 'recipes',
+          name: 'recipes',
+          component: () => import('../pages/knowledge/Recipes.vue')
+        }
+      ]
+    },
+    {
+      path: '/workshop',
+      name: 'workshop',
+      meta: {
+        requiresAuth: true
+      },
+      component: () => import('../pages/workshop/Workshop.vue')
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      meta: {
+        requiresAuth: true
+      },
+      redirect: '/profile/main',
+      component: () => import('../pages/profile/Index.vue'),
+      children: [
+        {
+          path: '/profile/main',
+          name: 'profile-main',
+          component: () => import('../pages/profile/Main.vue')
+        }
+      ]
     }
   ]
 }

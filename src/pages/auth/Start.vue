@@ -116,10 +116,13 @@ const checkUser = async () => {
 
     telegramId.value = telegramUserId
 
+    // Получаем photo_url из Telegram WebApp для синхронизации аватара
+    const photoUrl = WebApp.initDataUnsafe?.user?.photo_url || undefined
+
     // Используем loginByTelegramId напрямую для авторизации
     console.log('Вызываем loginByTelegramId для авторизации:', telegramUserId)
     try {
-      const loginResult = await loginByTelegramId(telegramUserId)
+      const loginResult = await loginByTelegramId(telegramUserId, photoUrl)
       
       if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
         // Авторизация успешна - получили токены
@@ -241,9 +244,12 @@ const handleActivate = async () => {
         userStore.setTelegramId(telegramId.value)
       }
       
+      // Получаем photo_url из Telegram WebApp для синхронизации аватара
+      const photoUrl = WebApp.initDataUnsafe?.user?.photo_url || undefined
+
       // После активации получаем токены через loginByTelegramId
       try {
-        const loginResult = await loginByTelegramId(telegramId.value)
+        const loginResult = await loginByTelegramId(telegramId.value, photoUrl)
         
         if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
           const authData = loginResult.data.loginByTelegramId.data
@@ -260,6 +266,7 @@ const handleActivate = async () => {
             email: userData.email,
             telegramId: userData.telegramId,
             activated: true,
+            avatarUrl: userData.avatarUrl ?? null,
             description: userData.description ?? null,
             shortDescription: userData.shortDescription ?? null,
             country: userData.country ?? null,
@@ -299,10 +306,14 @@ const handleRegister = async () => {
 
   try {
     loading.value = true
+    // Получаем photo_url из Telegram WebApp
+    const photoUrl = WebApp.initDataUnsafe?.user?.photo_url || null
+    
     const createdUser = await userStore.createUserAction({
       telegramId: telegramId.value,
       firstName: registrationForm.value.firstName || undefined,
-      lastName: registrationForm.value.lastName || undefined
+      lastName: registrationForm.value.lastName || undefined,
+      photoUrl: photoUrl || undefined
     })
     
     if (createdUser) {
@@ -325,9 +336,12 @@ const handleRegister = async () => {
         needsActivation.value = true
         showRegistration.value = false
       } else {
+        // Получаем photo_url из Telegram WebApp для синхронизации аватара
+        const photoUrl = WebApp.initDataUnsafe?.user?.photo_url || undefined
+
         // Если пользователь уже активирован, получаем токены
         try {
-          const loginResult = await loginByTelegramId(telegramId.value)
+          const loginResult = await loginByTelegramId(telegramId.value, photoUrl)
           
           if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
             const authData = loginResult.data.loginByTelegramId.data
@@ -344,6 +358,7 @@ const handleRegister = async () => {
               email: userData.email,
               telegramId: userData.telegramId,
               activated: true,
+              avatarUrl: userData.avatarUrl ?? null,
               description: userData.description ?? null,
               shortDescription: userData.shortDescription ?? null,
               country: userData.country ?? null,
@@ -393,10 +408,13 @@ const handleTestLogin = async () => {
 
     telegramId.value = Config.MY_TELEGRAM_ID
 
+    // Получаем photo_url из Telegram WebApp для синхронизации аватара (если доступен)
+    const photoUrl = WebApp?.initDataUnsafe?.user?.photo_url || undefined
+
     // Используем loginByTelegramId для авторизации (как в checkUser)
     console.log('Тестовый вход: вызываем loginByTelegramId для авторизации:', Config.MY_TELEGRAM_ID)
     try {
-      const loginResult = await loginByTelegramId(Config.MY_TELEGRAM_ID)
+      const loginResult = await loginByTelegramId(Config.MY_TELEGRAM_ID, photoUrl)
       
       if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
         // Авторизация успешна - получили токены

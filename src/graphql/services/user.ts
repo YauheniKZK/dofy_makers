@@ -78,11 +78,12 @@ const sendToChannel = async (input: SendToChannelInput) => {
   })
 }
 
-const loginByTelegramId = async (telegramId: string) => {
+const loginByTelegramId = async (telegramId: string, photoUrl?: string) => {
   return await client.mutate<LoginByTelegramIdResult>({
     mutation: LOGIN_BY_TELEGRAM_ID,
     variables: {
-      telegramId
+      telegramId,
+      ...(photoUrl && { photoUrl })
     }
   })
 }

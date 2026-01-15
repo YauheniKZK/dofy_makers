@@ -142,6 +142,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
           country: userData.country ?? null,
@@ -199,6 +200,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
           country: userData.country ?? null,
@@ -251,6 +253,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
           country: userData.country ?? null,
@@ -313,6 +316,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
           country: userData.country ?? null,
@@ -386,6 +390,7 @@ export const useUserStore = defineStore('user', () => {
           email: null, // Email не возвращается из registerUserByTelegram
           telegramId: registeredUser.telegramId,
           activated: registeredUser.activated,
+          avatarUrl: (registeredUser as any).avatarUrl ?? null,
           description: (registeredUser as any).description ?? null,
           shortDescription: (registeredUser as any).shortDescription ?? null,
           country: (registeredUser as any).country ?? null,
@@ -487,8 +492,12 @@ export const useUserStore = defineStore('user', () => {
           if (foundUser.activated) {
             console.log('Пользователь активирован, получаем токены через loginByTelegramId:', telegramIdToCheck)
             try {
+              // Получаем photo_url из WebApp для синхронизации аватара (если доступен)
+              const WebApp = (window as any).Telegram?.WebApp || (window as any).WebApp
+              const photoUrl = WebApp?.initDataUnsafe?.user?.photo_url || undefined
+              
               const { loginByTelegramId } = await import('@/graphql/services/user')
-              const loginResult = await loginByTelegramId(telegramIdToCheck)
+              const loginResult = await loginByTelegramId(telegramIdToCheck, photoUrl)
               console.log('Результат loginByTelegramId:', loginResult.data?.loginByTelegramId?.successfully)
               
               if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
@@ -505,6 +514,7 @@ export const useUserStore = defineStore('user', () => {
                   email: userData.email,
                   telegramId: userData.telegramId,
                   activated: true,
+                  avatarUrl: userData.avatarUrl ?? null,
                   description: userData.description ?? null,
                   shortDescription: userData.shortDescription ?? null,
                   country: userData.country ?? null,

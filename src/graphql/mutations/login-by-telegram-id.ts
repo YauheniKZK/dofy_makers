@@ -11,8 +11,8 @@ export interface LoginByTelegramIdResult {
 }
 
 export const LOGIN_BY_TELEGRAM_ID = gql`
-  mutation LoginByTelegramId($telegramId: String!) {
-    loginByTelegramId(telegramId: $telegramId) {
+  mutation LoginByTelegramId($telegramId: String!, $photoUrl: String) {
+    loginByTelegramId(telegramId: $telegramId, photoUrl: $photoUrl) {
       successfully
       message
       error
@@ -24,6 +24,7 @@ export const LOGIN_BY_TELEGRAM_ID = gql`
           name
           email
           telegramId
+          avatarUrl
           description
           shortDescription
           country

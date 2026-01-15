@@ -13,6 +13,7 @@ export interface AuthPayload {
     name: string
     email: string | null
     telegramId: string | null
+    avatarUrl: string | null
     description: string | null
     shortDescription: string | null
     country: string | null

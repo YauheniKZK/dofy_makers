@@ -4,6 +4,7 @@ export interface RegisterUserByTelegramInput {
   telegramId: string
   firstName?: string
   lastName?: string
+  photoUrl?: string
   description?: string
   shortDescription?: string
   country?: string
@@ -16,6 +17,7 @@ export interface RegisteredUser {
   telegramId: string | null
   name: string
   activated: boolean
+  avatarUrl?: string | null
   description?: string | null
   shortDescription?: string | null
   country?: string | null

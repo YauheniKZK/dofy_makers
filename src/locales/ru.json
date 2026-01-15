@@ -5,5 +5,10 @@
   "welcome_text_button": "Начать",
   "login_title": "Вход",
   "knowledge_title": "Кладовая",
-  "knowledge_description": "Хранилище полезных знаний и рецептов"
+  "knowledge_description": "Хранилище полезных знаний и рецептов",
+  "workshop_title": "Мастерская",
+  "profile_title": "Профиль",
+  "manual_title": "Справочник",
+  "recipes_title": "Рецепты",
+  "edit_description": "добавить описание"
 }

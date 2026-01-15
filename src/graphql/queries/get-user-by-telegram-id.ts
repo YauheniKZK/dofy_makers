@@ -21,6 +21,7 @@ export const GET_USER_BY_TELEGRAM_ID = gql`
         email
         telegramId
         activated
+        avatarUrl
         description
         shortDescription
         country
