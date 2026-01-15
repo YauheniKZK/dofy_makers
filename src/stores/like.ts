@@ -199,7 +199,7 @@ export const useLikeStore = defineStore('like', () => {
 
       if (response.data?.like?.successfully && response.data.like.data) {
         const likeItem = response.data.like.data
-        likeApiData.value.data = likeItem as Like
+        likeApiData.value.data = likeItem as any as Like | LikeFromMutation
         likeApiData.value.success = true
         likeApiData.value.message = response.data.like.message || 'Лайк поставлен'
         

@@ -119,8 +119,8 @@ export const usePostStore = defineStore('post', () => {
 
       if (response.data?.post?.successfully && response.data.post.data) {
         const post = response.data.post.data
-        currentPost.value = post as Post
-        getPostApiData.value.data = post
+        currentPost.value = post as any as Post
+        getPostApiData.value.data = post as any as Post | PostFromGetPost
         getPostApiData.value.success = true
         getPostApiData.value.message = response.data.post.message || 'Пост загружен'
         return post

@@ -125,8 +125,8 @@ export const useCouponStore = defineStore('coupon', () => {
 
       if (response.data?.couponByCode?.successfully && response.data.couponByCode.data) {
         const coupon = response.data.couponByCode.data
-        currentCoupon.value = coupon as Coupon
-        getCouponByCodeApiData.value.data = coupon
+        currentCoupon.value = coupon as any as Coupon
+        getCouponByCodeApiData.value.data = coupon as any as Coupon | CouponFromGetCouponByCode
         getCouponByCodeApiData.value.success = true
         getCouponByCodeApiData.value.message = response.data.couponByCode.message || 'Купон найден'
         return coupon

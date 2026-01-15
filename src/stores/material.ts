@@ -102,8 +102,8 @@ export const useMaterialStore = defineStore('material', () => {
 
       if (response.data?.material?.successfully && response.data.material.data) {
         const material = response.data.material.data
-        currentMaterial.value = material as Material
-        getMaterialApiData.value.data = material
+        currentMaterial.value = material as any as Material
+        getMaterialApiData.value.data = material as any as Material | MaterialFromGetMaterial
         getMaterialApiData.value.success = true
         getMaterialApiData.value.message = response.data.material.message || 'Материал загружен'
         return material
