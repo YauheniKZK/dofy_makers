@@ -11,7 +11,7 @@ const { currentUserGetters, isBlocked } = storeToRefs(userStore)
 
 const showBottomNavigation = computed(() => {
   // Показываем навигацию только на страницах dashboard, если есть пользователь и он не заблокирован
-  return !!currentUserGetters.value && !isBlocked.value && route.path.startsWith('/dashboard')
+  return !!currentUserGetters.value && !isBlocked.value && route.meta?.requiresAuth
 })
 </script>
 

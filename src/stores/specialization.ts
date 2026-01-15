@@ -9,15 +9,10 @@ import {
   getSpecializationUsers,
   getMeWithSpecializations,
   getUserWithSpecializations,
-  createSpecialization,
-  updateSpecialization,
-  deleteSpecialization,
   attachSpecializationToUser,
   detachSpecializationFromUser
 } from '@/graphql/services/specialization'
 import type { Specialization } from '@/graphql/interface'
-import type { CreateSpecializationInput } from '@/graphql/mutations/create-specialization'
-import type { UpdateSpecializationInput } from '@/graphql/mutations/update-specialization'
 import type { AttachSpecializationToUserInput } from '@/graphql/mutations/attach-specialization-to-user'
 import type { DetachSpecializationFromUserInput } from '@/graphql/mutations/detach-specialization-from-user'
 
@@ -64,9 +59,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
   const getSpecializationUsersApiData = ref<ApiState<any>>(createDefaultApiState<any>())
   const getMeWithSpecializationsApiData = ref<ApiState<Specialization[]>>(createDefaultApiState<Specialization[]>())
   const getUserWithSpecializationsApiData = ref<ApiState<Specialization[]>>(createDefaultApiState<Specialization[]>())
-  const createSpecializationApiData = ref<ApiState<Specialization>>(createDefaultApiState<Specialization>())
-  const updateSpecializationApiData = ref<ApiState<Specialization>>(createDefaultApiState<Specialization>())
-  const deleteSpecializationApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
   const attachSpecializationApiData = ref<ApiState<Specialization>>(createDefaultApiState<Specialization>())
   const detachSpecializationApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
 
@@ -85,9 +77,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
   const getSpecializationUsersApiDataGetters = computed(() => getSpecializationUsersApiData.value)
   const getMeWithSpecializationsApiDataGetters = computed(() => getMeWithSpecializationsApiData.value)
   const getUserWithSpecializationsApiDataGetters = computed(() => getUserWithSpecializationsApiData.value)
-  const createSpecializationApiDataGetters = computed(() => createSpecializationApiData.value)
-  const updateSpecializationApiDataGetters = computed(() => updateSpecializationApiData.value)
-  const deleteSpecializationApiDataGetters = computed(() => deleteSpecializationApiData.value)
   const attachSpecializationApiDataGetters = computed(() => attachSpecializationApiData.value)
   const detachSpecializationApiDataGetters = computed(() => detachSpecializationApiData.value)
 
@@ -262,122 +251,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
     }
   }
 
-  // Создать специализацию
-  const createSpecializationAction = async (input: CreateSpecializationInput): Promise<Specialization | null> => {
-    resetApiState(createSpecializationApiData.value)
-    createSpecializationApiData.value.loading = true
-
-    try {
-      const response = await createSpecialization(input)
-
-      if (response.data?.createSpecialization?.successfully && response.data.createSpecialization.data) {
-        const specialization = response.data.createSpecialization.data
-        createSpecializationApiData.value.data = specialization
-        createSpecializationApiData.value.success = true
-        createSpecializationApiData.value.message = response.data.createSpecialization.message || 'Специализация создана'
-        
-        // Обновляем локальный список
-        allSpecializations.value.push(specialization)
-        if (specialization.type === 'system') {
-          systemSpecializations.value.push(specialization)
-        } else {
-          patientSpecializations.value.push(specialization)
-          // Пользовательские специализации автоматически привязываются к создателю
-          // Добавляем в список специализаций текущего пользователя
-          if (!currentUserSpecializations.value.find(s => s.id === specialization.id)) {
-            currentUserSpecializations.value.push(specialization)
-          }
-        }
-        
-        return specialization
-      } else {
-        const errorMsg = response.data?.createSpecialization?.error || response.data?.createSpecialization?.message || 'Ошибка создания специализации'
-        createSpecializationApiData.value.error = true
-        createSpecializationApiData.value.message = errorMsg
-        return null
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Ошибка создания специализации'
-      createSpecializationApiData.value.error = true
-      createSpecializationApiData.value.message = errorMessage
-      return null
-    } finally {
-      createSpecializationApiData.value.loading = false
-    }
-  }
-
-  // Обновить специализацию
-  const updateSpecializationAction = async (input: UpdateSpecializationInput): Promise<Specialization | null> => {
-    resetApiState(updateSpecializationApiData.value)
-    updateSpecializationApiData.value.loading = true
-
-    try {
-      const response = await updateSpecialization(input)
-
-      if (response.data?.updateSpecialization?.successfully && response.data.updateSpecialization.data) {
-        const specialization = response.data.updateSpecialization.data
-        updateSpecializationApiData.value.data = specialization
-        updateSpecializationApiData.value.success = true
-        updateSpecializationApiData.value.message = response.data.updateSpecialization.message || 'Специализация обновлена'
-        
-        // Обновляем локальный список
-        const index = allSpecializations.value.findIndex(s => s.id === specialization.id)
-        if (index !== -1) {
-          allSpecializations.value[index] = specialization
-        }
-        
-        return specialization
-      } else {
-        const errorMsg = response.data?.updateSpecialization?.error || response.data?.updateSpecialization?.message || 'Ошибка обновления специализации'
-        updateSpecializationApiData.value.error = true
-        updateSpecializationApiData.value.message = errorMsg
-        return null
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Ошибка обновления специализации'
-      updateSpecializationApiData.value.error = true
-      updateSpecializationApiData.value.message = errorMessage
-      return null
-    } finally {
-      updateSpecializationApiData.value.loading = false
-    }
-  }
-
-  // Удалить специализацию
-  const deleteSpecializationAction = async (specializationId: string): Promise<boolean> => {
-    resetApiState(deleteSpecializationApiData.value)
-    deleteSpecializationApiData.value.loading = true
-
-    try {
-      const response = await deleteSpecialization(specializationId)
-
-      if (response.data?.deleteSpecialization?.successfully) {
-        deleteSpecializationApiData.value.data = true
-        deleteSpecializationApiData.value.success = true
-        deleteSpecializationApiData.value.message = response.data.deleteSpecialization.message || 'Специализация удалена'
-        
-        // Удаляем из локального списка
-        allSpecializations.value = allSpecializations.value.filter(s => s.id !== specializationId)
-        systemSpecializations.value = systemSpecializations.value.filter(s => s.id !== specializationId)
-        patientSpecializations.value = patientSpecializations.value.filter(s => s.id !== specializationId)
-        
-        return true
-      } else {
-        const errorMsg = response.data?.deleteSpecialization?.error || response.data?.deleteSpecialization?.message || 'Ошибка удаления специализации'
-        deleteSpecializationApiData.value.error = true
-        deleteSpecializationApiData.value.message = errorMsg
-        return false
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Ошибка удаления специализации'
-      deleteSpecializationApiData.value.error = true
-      deleteSpecializationApiData.value.message = errorMessage
-      return false
-    } finally {
-      deleteSpecializationApiData.value.loading = false
-    }
-  }
-
   // Привязать специализацию к пользователю
   const attachSpecializationToUserAction = async (input: AttachSpecializationToUserInput): Promise<Specialization | null> => {
     resetApiState(attachSpecializationApiData.value)
@@ -463,9 +336,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
     getSpecializationUsersApiData,
     getMeWithSpecializationsApiData,
     getUserWithSpecializationsApiData,
-    createSpecializationApiData,
-    updateSpecializationApiData,
-    deleteSpecializationApiData,
     attachSpecializationApiData,
     detachSpecializationApiData,
     
@@ -484,9 +354,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
     getSpecializationUsersApiDataGetters,
     getMeWithSpecializationsApiDataGetters,
     getUserWithSpecializationsApiDataGetters,
-    createSpecializationApiDataGetters,
-    updateSpecializationApiDataGetters,
-    deleteSpecializationApiDataGetters,
     attachSpecializationApiDataGetters,
     detachSpecializationApiDataGetters,
     
@@ -497,9 +364,6 @@ export const useSpecializationStore = defineStore('specialization', () => {
     fetchSpecializationById,
     fetchUserSpecializations,
     fetchMeWithSpecializations,
-    createSpecializationAction,
-    updateSpecializationAction,
-    deleteSpecializationAction,
     attachSpecializationToUserAction,
     detachSpecializationFromUserAction
   }

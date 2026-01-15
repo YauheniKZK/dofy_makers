@@ -24,20 +24,6 @@ import {
   type GetUserWithSpecializationsResult
 } from '../queries/get-me-with-specializations'
 import {
-  CREATE_SPECIALIZATION,
-  type CreateSpecializationInput,
-  type CreateSpecializationResult
-} from '../mutations/create-specialization'
-import {
-  UPDATE_SPECIALIZATION,
-  type UpdateSpecializationInput,
-  type UpdateSpecializationResult
-} from '../mutations/update-specialization'
-import {
-  DELETE_SPECIALIZATION,
-  type DeleteSpecializationResult
-} from '../mutations/delete-specialization'
-import {
   ATTACH_SPECIALIZATION_TO_USER,
   type AttachSpecializationToUserInput,
   type AttachSpecializationToUserResult
@@ -141,36 +127,6 @@ const getUserWithSpecializations = async (userId: string) => {
 // ============================================
 
 /**
- * Создать новую специализацию
- */
-const createSpecialization = async (input: CreateSpecializationInput) => {
-  return await client.mutate<CreateSpecializationResult>({
-    mutation: CREATE_SPECIALIZATION,
-    variables: { input }
-  })
-}
-
-/**
- * Обновить специализацию
- */
-const updateSpecialization = async (input: UpdateSpecializationInput) => {
-  return await client.mutate<UpdateSpecializationResult>({
-    mutation: UPDATE_SPECIALIZATION,
-    variables: { input }
-  })
-}
-
-/**
- * Удалить специализацию
- */
-const deleteSpecialization = async (specializationId: string) => {
-  return await client.mutate<DeleteSpecializationResult>({
-    mutation: DELETE_SPECIALIZATION,
-    variables: { specializationId }
-  })
-}
-
-/**
  * Привязать специализацию к пользователю
  */
 const attachSpecializationToUser = async (input: AttachSpecializationToUserInput) => {
@@ -201,9 +157,6 @@ export {
   getMeWithSpecializations,
   getUserWithSpecializations,
   // Mutations
-  createSpecialization,
-  updateSpecialization,
-  deleteSpecialization,
   attachSpecializationToUser,
   detachSpecializationFromUser
 }

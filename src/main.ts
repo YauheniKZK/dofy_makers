@@ -4,6 +4,7 @@ import App from './App.vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import { useUserStore } from './stores/user'
+import i18n from './i18n'
 // Импортируем WebApp для инициализации Telegram Mini App
 import WebApp from '@twa-dev/sdk'
 
@@ -26,7 +27,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
-
+app.use(i18n)
 // Инициализация store синхронно перед монтированием
 const userStore = useUserStore()
 // Инициализация выполняется асинхронно, но store уже создан с токенами из cookies

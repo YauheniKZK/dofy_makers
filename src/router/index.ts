@@ -27,9 +27,9 @@ router.beforeEach(async (to, from, next) => {
   }
   
   // Если пользователь авторизован (есть токен и пользователь в store) и находится на стартовой странице
-  // перенаправляем на dashboard
+  // перенаправляем на feeds
   if (to.path === '/' && userStore.isAuthenticated && userStore.currentUserGetters) {
-    return next('/dashboard')
+    return next('/feeds')
   }
   
   // Если маршрут требует авторизации, проверяем наличие пользователя в store

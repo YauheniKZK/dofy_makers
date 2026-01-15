@@ -3,11 +3,16 @@ import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import WebApp from '@twa-dev/sdk'
 import { useUserStore } from '@/stores/user'
-import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput } from 'naive-ui'
+import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput, NIcon } from 'naive-ui'
 import type { User } from '@/graphql/queries/get-authenticated-user'
 import { storeToRefs } from 'pinia'
 import { Config } from '@/config'
 import { loginByTelegramId } from '@/graphql/services/user'
+import { ChevronCircleRight48Regular } from '@vicons/fluent'
+import { useI18n } from 'vue-i18n'
+import Drawer from '@/components/ui/Drawer.vue'
+import Button from '@/components/ui/Button.vue'
+const { t } = useI18n()
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -20,6 +25,7 @@ const user = ref<User | null>(null)
 const needsActivation = ref(false)
 const showRegistration = ref(false)
 const telegramId = ref<string | null>(null)
+const showLoginModal = ref(false)
 
 const registrationForm = ref({
   firstName: '',
@@ -36,7 +42,7 @@ const checkUser = async () => {
     // Проверяем, не загружен ли уже пользователь из init()
     if (userStore.currentUserGetters && userStore.isAuthenticated) {
       // Пользователь уже загружен, переходим на dashboard
-      router.push('/dashboard')
+      router.push('/feeds')
       loading.value = false
       return
     }
@@ -158,7 +164,7 @@ const checkUser = async () => {
           }
           
           // Пользователь активирован, переходим на dashboard
-          router.push('/dashboard')
+          router.push('/feeds')
         } catch (fetchError: any) {
           const errorMessage = fetchError?.message || 'Ошибка загрузки данных пользователя'
           error.value = errorMessage
@@ -265,7 +271,7 @@ const handleActivate = async () => {
             updatedAt: userData.updatedAt || new Date().toISOString()
           })
           userStore.setTelegramId(telegramId.value)
-          router.push('/dashboard')
+          router.push('/feeds')
         } else {
           const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
           message.error(`Не удалось получить токены: ${errorMsg}`)
@@ -349,7 +355,7 @@ const handleRegister = async () => {
               updatedAt: userData.updatedAt || new Date().toISOString()
             })
             userStore.setTelegramId(telegramId.value)
-            router.push('/dashboard')
+            router.push('/feeds')
           } else {
             const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Ошибка получения токенов'
             message.error(`Не удалось получить токены: ${errorMsg}`)
@@ -387,40 +393,85 @@ const handleTestLogin = async () => {
 
     telegramId.value = Config.MY_TELEGRAM_ID
 
-    // Ищем пользователя по telegramId
-    const foundUser = await userStore.getUserByTelegramIdAction(Config.MY_TELEGRAM_ID)
-    
-    if (!foundUser) {
+    // Используем loginByTelegramId для авторизации (как в checkUser)
+    console.log('Тестовый вход: вызываем loginByTelegramId для авторизации:', Config.MY_TELEGRAM_ID)
+    try {
+      const loginResult = await loginByTelegramId(Config.MY_TELEGRAM_ID)
+      
+      if (loginResult.data?.loginByTelegramId?.successfully && loginResult.data.loginByTelegramId.data) {
+        // Авторизация успешна - получили токены
+        const authData = loginResult.data.loginByTelegramId.data
+        
+        // Сохраняем токены
+        userStore.setTokens({
+          accessToken: authData.accessToken,
+          refreshToken: authData.refreshToken
+        })
+        userStore.setTelegramId(Config.MY_TELEGRAM_ID)
+        
+        // После получения токенов загружаем пользователя через getCurrentUser
+        console.log('Токены получены, загружаем пользователя через fetchCurrentUser')
+        try {
+          await userStore.fetchCurrentUser()
+          
+          const foundUser = userStore.currentUserGetters
+          if (!foundUser) {
+            error.value = 'Не удалось загрузить данные пользователя'
+            loading.value = false
+            return
+          }
+          
+          user.value = foundUser
+          
+          // Проверяем блокировку пользователя
+          if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
+            const reasonsText = foundUser.blockReasons
+              .map((reason: any) => reason.description || reason.name)
+              .join('\n')
+            error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
+            loading.value = false
+            return
+          }
+          
+          // Проверяем поле activated
+          if (!foundUser.activated) {
+            needsActivation.value = true
+            loading.value = false
+            return
+          }
+          
+          // Пользователь активирован, переходим на dashboard
+          router.push('/feeds')
+        } catch (fetchError: any) {
+          const errorMessage = fetchError?.message || 'Ошибка загрузки данных пользователя'
+          error.value = errorMessage
+          loading.value = false
+          console.error('Ошибка загрузки пользователя после авторизации:', fetchError)
+        }
+      } else {
+        // Пользователь не найден или ошибка авторизации
+        const errorMsg = loginResult.data?.loginByTelegramId?.error || loginResult.data?.loginByTelegramId?.message || 'Пользователь не найден'
+        
+        // Если пользователь не найден, показываем форму регистрации
+        if (errorMsg.toLowerCase().includes('не найден') || errorMsg.toLowerCase().includes('not found')) {
+          showRegistration.value = true
+        } else {
+          error.value = `Ошибка авторизации: ${errorMsg}`
+        }
+        loading.value = false
+      }
+    } catch (loginError: any) {
+      const errorMessage = loginError?.message || 'Ошибка авторизации'
+      
       // Если пользователь не найден, показываем форму регистрации
-      showRegistration.value = true
+      if (errorMessage.toLowerCase().includes('не найден') || errorMessage.toLowerCase().includes('not found')) {
+        showRegistration.value = true
+      } else {
+        error.value = errorMessage
+      }
       loading.value = false
-      return
+      console.error('Ошибка авторизации через loginByTelegramId:', loginError)
     }
-
-    user.value = foundUser
-
-    // Проверяем блокировку пользователя
-    if (foundUser.blockReasons && foundUser.blockReasons.length > 0) {
-      // Пользователь заблокирован, показываем сообщение
-      const reasonsText = foundUser.blockReasons
-        .map(reason => reason.description || reason.name)
-        .join('\n')
-      error.value = `Ваш аккаунт заблокирован.\n\nПричины блокировки:\n${reasonsText}`
-      loading.value = false
-      return
-    }
-
-    // Проверяем поле activated
-    if (!foundUser.activated) {
-      needsActivation.value = true
-      loading.value = false
-      return
-    }
-
-    // Если пользователь активирован, сохраняем его и переходим на главную
-    userStore.setUser(foundUser)
-    userStore.setTelegramId(Config.MY_TELEGRAM_ID)
-    router.push('/dashboard')
   } catch (err: any) {
     error.value = err?.message || 'Произошла ошибка при проверке пользователя'
     loading.value = false
@@ -433,253 +484,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="start-page">
-    <!-- Временная кнопка для тестирования -->
-    <div v-if="hasTestTelegramId" class="test-button-wrapper">
-      <n-button
-        type="warning"
-        :disabled="loading"
-        @click="handleTestLogin"
-        block
-        size="large"
-        class="test-button"
-      >
-        Тестовый вход (ID: {{ Config.MY_TELEGRAM_ID }})
-      </n-button>
+  <div class="flex flex-col grow">
+    <div class="flex flex-col grow p-4 h-2/3 bg-[#36656B]">
     </div>
-    
-    <n-spin :show="loading">
-      <div class="auth-container">
-        <!-- Ошибка -->
-        <div v-if="error" class="auth-card error-card">
-          <div class="error-icon">⚠️</div>
-          <h2 class="auth-title">Ошибка</h2>
-          <pre class="error-message">{{ error }}</pre>
-        </div>
-        
-        <!-- Регистрация -->
-        <div v-else-if="showRegistration" class="auth-card">
-          <div class="auth-header">
-            <div class="auth-icon">👋</div>
-            <h2 class="auth-title">Добро пожаловать!</h2>
-            <p class="auth-subtitle">Заполните форму для регистрации</p>
-          </div>
-          <n-form :model="registrationForm" class="auth-form">
-            <n-form-item label="Имя" path="firstName">
-              <n-input
-                v-model:value="registrationForm.firstName"
-                placeholder="Введите ваше имя"
-                :disabled="createUserApiDataGetters.loading"
-                size="large"
-              />
-            </n-form-item>
-            <n-form-item label="Фамилия" path="lastName">
-              <n-input
-                v-model:value="registrationForm.lastName"
-                placeholder="Введите вашу фамилию"
-                :disabled="createUserApiDataGetters.loading"
-                size="large"
-              />
-            </n-form-item>
-            <n-button
-              type="primary"
-              :loading="createUserApiDataGetters.loading"
-              :disabled="createUserApiDataGetters.loading"
-              @click="handleRegister"
-              block
-              size="large"
-              class="auth-submit-button"
-            >
-              Зарегистрироваться
-            </n-button>
-          </n-form>
-        </div>
-        
-        <!-- Активация -->
-        <div v-else-if="needsActivation && user" class="auth-card">
-          <div class="auth-header">
-            <div class="auth-icon">✨</div>
-            <h2 class="auth-title">Добро пожаловать, {{ user.name }}!</h2>
-            <p class="auth-subtitle">Для продолжения необходимо активировать ваш аккаунт</p>
-          </div>
-          <n-button
-            type="primary"
-            :loading="loading"
-            @click="handleActivate"
-            block
-            size="large"
-            class="auth-submit-button"
-          >
-            Активировать аккаунт
-          </n-button>
-        </div>
-        
-        <!-- Загрузка -->
-        <div v-else class="auth-card">
-          <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">Загрузка...</p>
-          </div>
-        </div>
+    <div class="flex flex-col justify-between grow p-4 h-1/3">
+      <div class="flex flex-col grow">
+        <h1 class="text-2xl font-bold">{{ t('welcome_text_title') }}</h1>
+        <p class="text-lg">{{ t('welcome_text_description') }}</p>
       </div>
-    </n-spin>
+      <div class="flex justify-end">
+        <n-button text @click="showLoginModal = true">
+          <div class="flex items-center gap-2">
+            {{ t('welcome_text_button') }}
+            <n-icon :size="32">
+              <ChevronCircleRight48Regular />
+            </n-icon>
+          </div>
+        </n-button>
+      </div>
+    </div>
+    <Drawer :showModal="showLoginModal" @close="showLoginModal = false">
+      <template #content>
+        <div class="flex flex-col grow">
+          <h2 class="text-2xl font-bold">{{ t('login_title') }}</h2>
+          <div class="flex flex-col justify-end grow">
+            <Button title="Login" :color="'#000000'" :textColor="'white'" @click="handleTestLogin" />
+          </div>
+        </div>
+      </template>
+    </Drawer>
   </div>
+
 </template>
 
 <style scoped>
-.start-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
-  background: #E5D7C4;
-}
-
-.test-button-wrapper {
-  max-width: 420px;
-  width: 100%;
-  margin-bottom: 1.5rem;
-}
-
-.test-button {
-  border: 2px solid #4C3E19;
-}
-
-.auth-container {
-  max-width: 420px;
-  width: 100%;
-}
-
-.auth-card {
-  background: #CFBB99;
-  padding: 2.5rem 2rem;
-  border: 2px solid #B5A082;
-  animation: fadeIn 0.4s ease-out;
-}
-
-.error-card {
-  text-align: center;
-}
-
-.error-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.auth-icon {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
-  animation: fadeIn 0.5s ease-out;
-}
-
-.auth-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-  color: #4C3E19;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-.auth-form {
-  margin-top: 1.5rem;
-}
-
-.auth-submit-button {
-  margin-top: 1.5rem;
-  height: 48px;
-  font-weight: 600;
-  font-size: 1rem;
-  background: #354024;
-  border: 2px solid #354024;
-  color: #FFFFFF;
-}
-
-.auth-submit-button:hover {
-  background: #4C3E19;
-  border-color: #4C3E19;
-}
-
-.error-message {
-  white-space: pre-wrap;
-  color: #1A1A1A;
-  text-align: left;
-  background: #E5D7C4;
-  padding: 1rem;
-  border: 2px solid #B5A082;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-top: 1rem;
-}
-
-.loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #CFBB99;
-  border-top-color: #354024;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 1rem;
-}
-
-.loading-text {
-  color: #4C3E19;
-  font-size: 0.95rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-:deep(.n-form-item-label) {
-  font-weight: 500;
-  color: #4C3E19;
-  font-size: 0.9rem;
-}
-
-:deep(.n-input) {
-  border: 2px solid #B5A082;
-  background: #E5D7C4;
-}
-
-:deep(.n-input:focus) {
-  border-color: #354024;
-}
-
-:deep(.n-card) {
-  border: 2px solid #B5A082;
-  background: #CFBB99;
-}
 </style>
 

@@ -9,36 +9,28 @@ export default () => {
       component: () => import('../pages/auth/Start.vue')
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
+      path: '/login',
+      name: 'login',
       meta: {
         requiresAuth: false
       },
-      component: () => import('../pages/dashboard/Main.vue')
+      component: () => import('../pages/auth/Login.vue')
     },
     {
-      path: '/dashboard/statistics',
-      name: 'statistics',
+      path: '/feeds',
+      name: 'feeds',
       meta: {
-        requiresAuth: false
+        requiresAuth: true
       },
-      component: () => import('../pages/dashboard/Statistics.vue')
+      component: () => import('../pages/feeds/Feeds.vue')
     },
     {
-      path: '/dashboard/catalog',
-      name: 'catalog',
+      path: '/knowledge',
+      name: 'knowledge',
       meta: {
-        requiresAuth: false
+        requiresAuth: true
       },
-      component: () => import('../pages/dashboard/Catalog.vue')
-    },
-    {
-      path: '/dashboard/profile',
-      name: 'profile',
-      meta: {
-        requiresAuth: false
-      },
-      component: () => import('../pages/dashboard/Profile.vue')
+      component: () => import('../pages/knowledge/Knowledge.vue')
     }
   ]
 }

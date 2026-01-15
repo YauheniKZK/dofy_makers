@@ -1,66 +1,55 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { Home20Regular, ChartMultiple20Regular, FolderOpen24Regular, Person20Regular } from '@vicons/fluent'
-
+import { ChartMultiple20Regular, FolderOpen24Regular, Person20Regular, BroadActivityFeed20Regular, BookDatabase20Regular } from '@vicons/fluent'
+import { ToolKit } from '@vicons/carbon'
+import { NIcon, NTabs, NTab } from 'naive-ui'
 const router = useRouter()
 const route = useRoute()
 
 const navItems = [
   {
-    name: 'Главная',
-    path: '/dashboard',
-    icon: Home20Regular
+    name: 'Лента',
+    key: 'feeds',
+    path: '/feeds',
+    icon: BroadActivityFeed20Regular
   },
   {
-    name: 'Статистика',
-    path: '/dashboard/statistics',
-    icon: ChartMultiple20Regular
+    name: 'Кладовая',
+    path: '/knowledge',
+    key: 'knowledge',
+    icon: BookDatabase20Regular
   },
   {
-    name: 'Мой каталог',
-    path: '/dashboard/catalog',
-    icon: FolderOpen24Regular
+    name: 'Мастерская',
+    path: '/',
+    key: 'catalog',
+    icon: ToolKit
   },
   {
     name: 'Профиль',
-    path: '/dashboard/profile',
+    path: '/',
+    key: 'profile',
     icon: Person20Regular
   }
 ]
 
-const isActive = (path: string) => {
-  // Для главной страницы проверяем точное совпадение
-  if (path === '/dashboard') {
-    return route.path === '/dashboard'
-  }
-  // Для остальных страниц проверяем начало пути
-  return route.path.startsWith(path)
+const navigate = (value: string) => {
+  router.push({ path: value })
 }
 
-const navigate = (path: string) => {
-  router.push(path)
-}
 </script>
 
 <template>
-  <nav class="bottom-nav-minimal safe-area-inset-bottom">
-    <div class="flex justify-around items-center h-16 px-2">
-      <button
-        v-for="item in navItems"
-        :key="item.path"
-        @click="navigate(item.path)"
-        :class="[
-          'nav-item',
-          isActive(item.path) ? 'nav-item-active' : ''
-        ]"
-      >
-        <div class="nav-icon-wrapper">
-          <component :is="item.icon" :size="22" />
-        </div>
+  <n-tabs type="segment" animated class="bottom-navigation" @update:value="navigate">
+    <n-tab v-for="item in navItems" :key="item.key" :name="item.key">
+      <div class="flex flex-col items-center">
+        <n-icon :size="22">
+          <component :is="item.icon" />
+        </n-icon>
         <span class="nav-label">{{ item.name }}</span>
-      </button>
-    </div>
-  </nav>
+      </div>
+    </n-tab>
+  </n-tabs>
 </template>
 
 <style scoped>
@@ -69,8 +58,8 @@ const navigate = (path: string) => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #CFBB99;
-  border-top: 2px solid #B5A082;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px -1px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  border-radius: 15px 15px 0 0;
   z-index: 9999;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -92,13 +81,13 @@ const navigate = (path: string) => {
 }
 
 .nav-item:hover {
-  background: #C0AB88;
+  background: transparent;
   color: #354024;
 }
 
 .nav-item-active {
   color: #354024;
-  background: #B5A082;
+  background: transparent;
 }
 
 .nav-icon-wrapper {

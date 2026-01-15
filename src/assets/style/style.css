@@ -1,122 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
-
-/* Flat Design цветовая палитра */
-:root {
-  /* Основная палитра */
-  --color-accent-primary: #4C3E19;
-  --color-accent-secondary: #354024;
-  --color-neutral: #889063;
-  --color-surface-card: #CFBB99;
-  --color-background-main: #E5D7C4;
-  
-  /* Дополнительные цвета для интерфейса */
-  --color-background: #E5D7C4;
-  --color-surface: #CFBB99;
-  --color-surface-hover: #C0AB88;
-  --color-border: #B5A082;
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #4C3E19;
-  --color-text-tertiary: #6B5D3F;
-  --color-text-on-accent: #FFFFFF;
-  
-  /* Плоский дизайн - без теней */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  
-  /* Плоские скругления - минимальные */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-}
 
 * {
   box-sizing: border-box;
 }
 
-body {
+body, html {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  font-family: "Roboto", sans-serif;
+  font-style: normal;
   line-height: 1.6;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fff;
 }
 
-/* Улучшенная типографика */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--color-text-primary);
-  margin: 0;
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
 }
 
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
+.n-drawer-content {
+  --n-border-radius: 15px !important;
 }
 
-h2 {
-  font-size: 1.5rem;
+.n-drawer-content .n-drawer-body-content-wrapper {
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
 }
 
-h3 {
-  font-size: 1.25rem;
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border-radius: 15px 15px 0 0;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px -1px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  z-index: 9999;
+  padding-bottom: env(safe-area-inset-bottom);
+  --n-tab-border-radius: 15px !important;
+  --n-tab-color-segment: #155a5a !important;
+  --n-tab-text-color-active: rgb(255, 255, 255) !important;
+  --n-tab-text-color-hover: rgb(255, 255, 255) !important;
 }
 
-/* Плавные переходы */
-* {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-/* Улучшенные скроллбары */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-tertiary);
-}
-
-/* Утилиты для Flat Design */
-.card-flat {
-  background: var(--color-surface-card);
-  border: 2px solid var(--color-border);
-  padding: 1.5rem;
-}
-
-.card-flat:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-accent-secondary);
-}
-
-/* Анимации */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
+.page-layout .n-scrollbar-content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+  padding: 16px;
 }

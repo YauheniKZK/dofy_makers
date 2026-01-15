@@ -153,7 +153,7 @@ export const useUserStore = defineStore('user', () => {
           createdAt: userData.createdAt || new Date().toISOString(),
           updatedAt: userData.updatedAt || new Date().toISOString()
         })
-        router.push('/dashboard')
+        router.push('/feeds')
       } else {
         const errorMsg = response.data?.login?.error || response.data?.login?.message || 'Ошибка авторизации'
         loginApiData.value.error = true
