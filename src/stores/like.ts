@@ -9,6 +9,7 @@ import {
   unlike
 } from '@/graphql/services/like'
 import type { Like } from '@/graphql/queries/get-likes'
+import type { Like as LikeFromMutation } from '@/graphql/mutations/like'
 import type { UserLike } from '@/graphql/queries/get-user-likes'
 import type { LikeInput } from '@/graphql/mutations/like'
 
@@ -51,7 +52,7 @@ export const useLikeStore = defineStore('like', () => {
   const getLikeCountApiData = ref<ApiState<number>>(createDefaultApiState<number>())
   const getUserLikesApiData = ref<ApiState<{ likes: UserLike[]; total: number }>>(createDefaultApiState<{ likes: UserLike[]; total: number }>())
   const isLikedApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
-  const likeApiData = ref<ApiState<Like>>(createDefaultApiState<Like>())
+  const likeApiData = ref<ApiState<Like | LikeFromMutation>>(createDefaultApiState<Like | LikeFromMutation>())
   const unlikeApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
 
   // -----------------GETTERS---------------------
@@ -189,7 +190,7 @@ export const useLikeStore = defineStore('like', () => {
   }
 
   // Поставить лайк
-  const likeAction = async (input: LikeInput): Promise<Like | null> => {
+  const likeAction = async (input: LikeInput): Promise<Like | LikeFromMutation | null> => {
     resetApiState(likeApiData.value)
     likeApiData.value.loading = true
 
@@ -198,7 +199,7 @@ export const useLikeStore = defineStore('like', () => {
 
       if (response.data?.like?.successfully && response.data.like.data) {
         const likeItem = response.data.like.data
-        likeApiData.value.data = likeItem
+        likeApiData.value.data = likeItem as Like
         likeApiData.value.success = true
         likeApiData.value.message = response.data.like.message || 'Лайк поставлен'
         

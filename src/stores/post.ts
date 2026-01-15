@@ -13,6 +13,7 @@ import {
   incrementPostViews
 } from '@/graphql/services/post'
 import type { Post } from '@/graphql/queries/get-posts'
+import type { Post as PostFromGetPost } from '@/graphql/queries/get-post'
 import type { CreatePostInput } from '@/graphql/mutations/create-post'
 import type { UpdatePostInput } from '@/graphql/mutations/update-post'
 import type { AttachTagsToPostInput } from '@/graphql/mutations/attach-tags-to-post'
@@ -48,11 +49,11 @@ const resetApiState = <T = any>(state: ApiState<T>): void => {
 export const usePostStore = defineStore('post', () => {
   // -----------------STATE---------------------
   const posts = ref<Post[]>([])
-  const currentPost = ref<Post | null>(null)
+  const currentPost = ref<Post | PostFromGetPost | null>(null)
 
   // Состояния для каждого API запроса
   const getPostsApiData = ref<ApiState<{ posts: Post[]; total: number }>>(createDefaultApiState<{ posts: Post[]; total: number }>())
-  const getPostApiData = ref<ApiState<Post>>(createDefaultApiState<Post>())
+  const getPostApiData = ref<ApiState<Post | PostFromGetPost>>(createDefaultApiState<Post | PostFromGetPost>())
   const createPostApiData = ref<ApiState<Post>>(createDefaultApiState<Post>())
   const updatePostApiData = ref<ApiState<Post>>(createDefaultApiState<Post>())
   const deletePostApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
@@ -109,7 +110,7 @@ export const usePostStore = defineStore('post', () => {
   }
 
   // Получить пост по ID
-  const fetchPost = async (id: string): Promise<Post | null> => {
+  const fetchPost = async (id: string): Promise<Post | PostFromGetPost | null> => {
     resetApiState(getPostApiData.value)
     getPostApiData.value.loading = true
 
@@ -117,8 +118,8 @@ export const usePostStore = defineStore('post', () => {
       const response = await getPost(id)
 
       if (response.data?.post?.successfully && response.data.post.data) {
-        const post = response.data.post.data as Post
-        currentPost.value = post
+        const post = response.data.post.data
+        currentPost.value = post as Post
         getPostApiData.value.data = post
         getPostApiData.value.success = true
         getPostApiData.value.message = response.data.post.message || 'Пост загружен'

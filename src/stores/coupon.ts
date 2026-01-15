@@ -6,6 +6,7 @@ import {
   getCouponByCode
 } from '@/graphql/services/coupon'
 import type { Coupon } from '@/graphql/queries/get-coupons'
+import type { Coupon as CouponFromGetCouponByCode } from '@/graphql/queries/get-coupon-by-code'
 
 // Универсальный интерфейс для состояния запроса
 interface ApiState<T = any> {
@@ -37,12 +38,12 @@ const resetApiState = <T = any>(state: ApiState<T>): void => {
 export const useCouponStore = defineStore('coupon', () => {
   // -----------------STATE---------------------
   const coupons = ref<Coupon[]>([])
-  const currentCoupon = ref<Coupon | null>(null)
+  const currentCoupon = ref<Coupon | CouponFromGetCouponByCode | null>(null)
 
   // Состояния для каждого API запроса
   const getCouponsApiData = ref<ApiState<{ coupons: Coupon[]; total: number }>>(createDefaultApiState<{ coupons: Coupon[]; total: number }>())
   const getCouponApiData = ref<ApiState<Coupon>>(createDefaultApiState<Coupon>())
-  const getCouponByCodeApiData = ref<ApiState<Coupon>>(createDefaultApiState<Coupon>())
+  const getCouponByCodeApiData = ref<ApiState<Coupon | CouponFromGetCouponByCode>>(createDefaultApiState<Coupon | CouponFromGetCouponByCode>())
 
   // -----------------GETTERS---------------------
   const couponsGetters = computed(() => coupons.value)
@@ -115,7 +116,7 @@ export const useCouponStore = defineStore('coupon', () => {
   }
 
   // Получить купон по коду
-  const fetchCouponByCode = async (code: string): Promise<Coupon | null> => {
+  const fetchCouponByCode = async (code: string): Promise<Coupon | CouponFromGetCouponByCode | null> => {
     resetApiState(getCouponByCodeApiData.value)
     getCouponByCodeApiData.value.loading = true
 
@@ -124,7 +125,7 @@ export const useCouponStore = defineStore('coupon', () => {
 
       if (response.data?.couponByCode?.successfully && response.data.couponByCode.data) {
         const coupon = response.data.couponByCode.data
-        currentCoupon.value = coupon
+        currentCoupon.value = coupon as Coupon
         getCouponByCodeApiData.value.data = coupon
         getCouponByCodeApiData.value.success = true
         getCouponByCodeApiData.value.message = response.data.couponByCode.message || 'Купон найден'

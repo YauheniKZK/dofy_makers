@@ -7,6 +7,7 @@ import {
   getMaterialGroup
 } from '@/graphql/services/material'
 import type { Material } from '@/graphql/queries/get-materials'
+import type { Material as MaterialFromGetMaterial } from '@/graphql/queries/get-material'
 import type { MaterialGroup } from '@/graphql/queries/get-material-groups'
 
 // Универсальный интерфейс для состояния запроса
@@ -39,13 +40,13 @@ const resetApiState = <T = any>(state: ApiState<T>): void => {
 export const useMaterialStore = defineStore('material', () => {
   // -----------------STATE---------------------
   const materials = ref<Material[]>([])
-  const currentMaterial = ref<Material | null>(null)
+  const currentMaterial = ref<Material | MaterialFromGetMaterial | null>(null)
   const materialGroups = ref<MaterialGroup[]>([])
   const currentMaterialGroup = ref<MaterialGroup | null>(null)
 
   // Состояния для каждого API запроса
   const getMaterialsApiData = ref<ApiState<Material[]>>(createDefaultApiState<Material[]>())
-  const getMaterialApiData = ref<ApiState<Material>>(createDefaultApiState<Material>())
+  const getMaterialApiData = ref<ApiState<Material | MaterialFromGetMaterial>>(createDefaultApiState<Material | MaterialFromGetMaterial>())
   const getMaterialGroupsApiData = ref<ApiState<MaterialGroup[]>>(createDefaultApiState<MaterialGroup[]>())
   const getMaterialGroupApiData = ref<ApiState<MaterialGroup>>(createDefaultApiState<MaterialGroup>())
 
@@ -92,7 +93,7 @@ export const useMaterialStore = defineStore('material', () => {
   }
 
   // Получить материал по ID
-  const fetchMaterial = async (id: string): Promise<Material | null> => {
+  const fetchMaterial = async (id: string): Promise<Material | MaterialFromGetMaterial | null> => {
     resetApiState(getMaterialApiData.value)
     getMaterialApiData.value.loading = true
 
@@ -101,7 +102,7 @@ export const useMaterialStore = defineStore('material', () => {
 
       if (response.data?.material?.successfully && response.data.material.data) {
         const material = response.data.material.data
-        currentMaterial.value = material
+        currentMaterial.value = material as Material
         getMaterialApiData.value.data = material
         getMaterialApiData.value.success = true
         getMaterialApiData.value.message = response.data.material.message || 'Материал загружен'
