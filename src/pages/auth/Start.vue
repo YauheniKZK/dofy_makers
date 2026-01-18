@@ -5,6 +5,7 @@ import WebApp from '@twa-dev/sdk'
 import { useUserStore } from '@/stores/user'
 import { NSpin, NCard, NButton, useMessage, NForm, NFormItem, NInput, NIcon } from 'naive-ui'
 import type { User } from '@/graphql/queries/get-authenticated-user'
+import { UserStatus } from '@/graphql/interface'
 import { storeToRefs } from 'pinia'
 import { Config } from '@/config'
 import { loginByTelegramId } from '@/graphql/services/user'
@@ -266,6 +267,7 @@ const handleActivate = async () => {
             email: userData.email,
             telegramId: userData.telegramId,
             activated: true,
+            status: userData.status || UserStatus.ACTIVE,
             avatarUrl: userData.avatarUrl ?? null,
             description: userData.description ?? null,
             shortDescription: userData.shortDescription ?? null,
@@ -358,6 +360,7 @@ const handleRegister = async () => {
               email: userData.email,
               telegramId: userData.telegramId,
               activated: true,
+              status: userData.status || UserStatus.ACTIVE,
               avatarUrl: userData.avatarUrl ?? null,
               description: userData.description ?? null,
               shortDescription: userData.shortDescription ?? null,

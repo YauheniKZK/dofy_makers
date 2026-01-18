@@ -1,6 +1,7 @@
 import { useNotification as useNaiveNotification } from 'naive-ui'
 import type { NotificationType } from 'naive-ui'
 import type { Component } from 'vue'
+import { h } from 'vue'
 
 export interface NotificationOptions {
   /** Заголовок уведомления */
@@ -62,9 +63,11 @@ export function useNotification() {
       title,
       content,
       type,
-      icon,
       duration,
-      closable
+      closable,
+      ...(icon && {
+        meta: () => h(icon)
+      })
     })
   }
 
