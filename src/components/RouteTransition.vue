@@ -8,11 +8,13 @@
         <span class="back-button-text">Назад</span>
       </button>
     </div>
-    <router-view v-slot="{ Component }">
-      <transition :name="transitionName">
-        <component :is="Component" :key="route.path" />
-      </transition>
-    </router-view>
+    <div class="route-transition-content">
+      <router-view v-slot="{ Component }">
+        <transition :name="transitionName">
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </router-view>
+    </div>
   </div>
 </template>
 
@@ -78,10 +80,18 @@ const handleBack = () => {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.route-transition-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .back-button-container {
@@ -136,6 +146,8 @@ const handleBack = () => {
   transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1),
               opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
   will-change: transform, opacity;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .slide-left-enter-from {
@@ -171,6 +183,8 @@ const handleBack = () => {
   transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1),
               opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
   will-change: transform, opacity;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .slide-right-enter-from {

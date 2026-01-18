@@ -26,8 +26,8 @@ body, html {
   flex-grow: 1;
 }
 
-.n-drawer-content {
-  --n-border-radius: 15px !important;
+.n-drawer-container {
+  --n-border-radius: 32px !important;
 }
 
 .n-drawer-content .n-drawer-body-content-wrapper {
@@ -44,7 +44,7 @@ body, html {
   background-color: #fff;
   border-radius: 15px 15px 0 0;
   box-shadow: rgba(0, 0, 0, 0.16) 0px -1px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-  z-index: 9999;
+  z-index: 1999;
   padding-bottom: env(safe-area-inset-bottom);
   --n-tab-border-radius: 15px !important;
   --n-tab-color-segment: #155a5a !important;
@@ -53,10 +53,14 @@ body, html {
   --n-tab-text-color: rgb(31, 34, 37) !important;
 }
 
-.page-layout .n-scrollbar-content {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-flow: column;
-  flex-grow: 1;
+/* Стили для PageLayout - больше не используются, т.к. убрали n-scrollbar */
+
+.n-input {
+  --n-border-radius: 15px !important;
+  --n-height: 48px !important;
+}
+
+.n-base-selection  {
+  --n-border-radius: 15px !important;
+  --n-height: 48px !important;
 }

@@ -2,11 +2,14 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
 import router from '@/router'
-import { login as loginApi, refreshToken as refreshTokenApi, getCurrentUser as getCurrentUserApi, getUserByTelegramId as getUserByTelegramIdApi, activateUser as activateUserApi, registerUserByTelegram as registerUserByTelegramApi } from '@/graphql/services/user'
+import { login as loginApi, refreshToken as refreshTokenApi, getCurrentUser as getCurrentUserApi, getUserByTelegramId as getUserByTelegramIdApi, activateUser as activateUserApi, registerUserByTelegram as registerUserByTelegramApi, updateUser as updateUserApi, updateUserStatus as updateUserStatusApi } from '@/graphql/services/user'
 import type { LoginInput, AuthPayload } from '@/graphql/mutations/create-tokens-user'
 import type { User, BlockReason } from '@/graphql/queries/get-authenticated-user'
 import type { ActivatedUser } from '@/graphql/mutations/activate-user'
 import type { RegisterUserByTelegramInput } from '@/graphql/mutations/create-user'
+import type { UpdateUserInput } from '@/graphql/mutations/update-user'
+import type { UpdateUserStatusInput } from '@/graphql/mutations/update-user-status'
+import { UserStatus } from '@/graphql/interface'
 
 const ACCESS_TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
@@ -53,6 +56,8 @@ export const useUserStore = defineStore('user', () => {
   const refreshTokenApiData = ref<ApiState<AuthPayload>>(createDefaultApiState<AuthPayload>())
   const activateUserApiData = ref<ApiState<ActivatedUser>>(createDefaultApiState<ActivatedUser>())
   const createUserApiData = ref<ApiState<User>>(createDefaultApiState<User>())
+  const updateUserApiData = ref<ApiState<any>>(createDefaultApiState<any>())
+  const updateUserStatusApiData = ref<ApiState<any>>(createDefaultApiState<any>())
 
   // -----------------GETTERS---------------------
   const currentUserGetters = computed(() => currentUser.value)
@@ -75,6 +80,8 @@ export const useUserStore = defineStore('user', () => {
   const refreshTokenApiDataGetters = computed(() => refreshTokenApiData.value)
   const activateUserApiDataGetters = computed(() => activateUserApiData.value)
   const createUserApiDataGetters = computed(() => createUserApiData.value)
+  const updateUserApiDataGetters = computed(() => updateUserApiData.value)
+  const updateUserStatusApiDataGetters = computed(() => updateUserStatusApiData.value)
 
   // -----------------ACTIONS---------------------
 
@@ -142,6 +149,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          status: userData.status || UserStatus.ACTIVE,
           avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
@@ -200,6 +208,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          status: userData.status || UserStatus.ACTIVE,
           avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
@@ -253,6 +262,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          status: userData.status || UserStatus.ACTIVE,
           avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
@@ -316,6 +326,7 @@ export const useUserStore = defineStore('user', () => {
           email: userData.email,
           telegramId: userData.telegramId,
           activated: userData.activated ?? false,
+          status: userData.status || UserStatus.ACTIVE,
           avatarUrl: userData.avatarUrl ?? null,
           description: userData.description ?? null,
           shortDescription: userData.shortDescription ?? null,
@@ -390,6 +401,7 @@ export const useUserStore = defineStore('user', () => {
           email: null, // Email не возвращается из registerUserByTelegram
           telegramId: registeredUser.telegramId,
           activated: registeredUser.activated,
+          status: (registeredUser as any).status || UserStatus.ACTIVE,
           avatarUrl: (registeredUser as any).avatarUrl ?? null,
           description: (registeredUser as any).description ?? null,
           shortDescription: (registeredUser as any).shortDescription ?? null,
@@ -423,6 +435,70 @@ export const useUserStore = defineStore('user', () => {
       return null
     } finally {
       createUserApiData.value.loading = false
+    }
+  }
+
+  const updateUserAction = async (input: UpdateUserInput): Promise<boolean> => {
+    resetApiState(updateUserApiData.value)
+    updateUserApiData.value.loading = true
+    
+    try {
+      const response = await updateUserApi(input)
+      
+      if (response.data?.updateUser?.successfully) {
+        updateUserApiData.value.data = response.data.updateUser.data
+        updateUserApiData.value.success = true
+        updateUserApiData.value.message = response.data.updateUser.message || 'Пользователь успешно обновлен'
+        return true
+      } else {
+        const errorMsg = response.data?.updateUser?.error || response.data?.updateUser?.message || 'Не удалось обновить пользователя'
+        updateUserApiData.value.error = true
+        updateUserApiData.value.message = errorMsg
+        return false
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'Ошибка обновления пользователя'
+      updateUserApiData.value.error = true
+      updateUserApiData.value.message = errorMessage
+      return false
+    } finally {
+      updateUserApiData.value.loading = false
+    }
+  }
+
+  const updateUserStatusAction = async (input: UpdateUserStatusInput): Promise<boolean> => {
+    resetApiState(updateUserStatusApiData.value)
+    updateUserStatusApiData.value.loading = true
+    
+    try {
+      const response = await updateUserStatusApi(input)
+      
+      if (response.data?.updateUserStatus?.successfully) {
+        const userData = response.data.updateUserStatus.data as any
+        // Обновляем текущего пользователя, если это он
+        if (currentUser.value && userData.id === currentUser.value.id) {
+          setUser({
+            ...currentUser.value,
+            status: userData.status
+          })
+        }
+        updateUserStatusApiData.value.data = userData
+        updateUserStatusApiData.value.success = true
+        updateUserStatusApiData.value.message = response.data.updateUserStatus.message || 'Статус пользователя успешно обновлен'
+        return true
+      } else {
+        const errorMsg = response.data?.updateUserStatus?.error || response.data?.updateUserStatus?.message || 'Не удалось обновить статус пользователя'
+        updateUserStatusApiData.value.error = true
+        updateUserStatusApiData.value.message = errorMsg
+        return false
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'Ошибка обновления статуса пользователя'
+      updateUserStatusApiData.value.error = true
+      updateUserStatusApiData.value.message = errorMessage
+      return false
+    } finally {
+      updateUserStatusApiData.value.loading = false
     }
   }
 
@@ -514,6 +590,7 @@ export const useUserStore = defineStore('user', () => {
                   email: userData.email,
                   telegramId: userData.telegramId,
                   activated: true,
+                  status: userData.status || foundUser.status || UserStatus.ACTIVE,
                   avatarUrl: userData.avatarUrl ?? null,
                   description: userData.description ?? null,
                   shortDescription: userData.shortDescription ?? null,
@@ -593,6 +670,8 @@ export const useUserStore = defineStore('user', () => {
     refreshTokenApiData,
     activateUserApiData,
     createUserApiData,
+    updateUserApiData,
+    updateUserStatusApiData,
     
     // Getters
     currentUserGetters,
@@ -609,6 +688,8 @@ export const useUserStore = defineStore('user', () => {
     refreshTokenApiDataGetters,
     activateUserApiDataGetters,
     createUserApiDataGetters,
+    updateUserApiDataGetters,
+    updateUserStatusApiDataGetters,
     
     // Actions
     loginAction,
@@ -618,6 +699,8 @@ export const useUserStore = defineStore('user', () => {
     getUserByTelegramIdAction,
     activateUserAction,
     createUserAction,
+    updateUserAction,
+    updateUserStatusAction,
     init,
     setTokens,
     clearTokens,

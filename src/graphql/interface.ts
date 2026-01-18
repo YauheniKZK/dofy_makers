@@ -4,6 +4,12 @@ export interface ApiResponse {
   successful: boolean
 }
 
+// Enum для статуса пользователя
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive'
+}
+
 // Экспорт интерфейса специализации для общего использования
 export interface Specialization {
   id: string

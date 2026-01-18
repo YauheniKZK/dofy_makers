@@ -1,5 +1,5 @@
 import gql from 'graphql-tag'
-import { Specialization } from '../interface'
+import { Specialization, UserStatus } from '../interface'
 
 export interface BlockReason {
   id: string
@@ -14,6 +14,7 @@ export interface User {
   email: string | null
   telegramId: string | null
   activated: boolean
+  status: UserStatus
   avatarUrl: string | null
   description: string | null
   shortDescription: string | null
@@ -52,6 +53,7 @@ export const GET_CURRENT_USER = gql`
         email
         telegramId
         activated
+        status
         avatarUrl
         description
         shortDescription

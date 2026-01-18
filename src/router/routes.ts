@@ -56,7 +56,46 @@ export default () => {
       meta: {
         requiresAuth: true
       },
-      component: () => import('../pages/workshop/Workshop.vue')
+      redirect: '/workshop/main',
+      component: () => import('../pages/workshop/Index.vue'),
+      children: [
+        {
+          path: '/workshop/main',
+          name: 'workshop-main',
+          component: () => import('../pages/workshop/Main.vue')
+        },
+        {
+          path: '/workshop/my-works',
+          name: 'my-works',
+          component: () => import('../pages/workshop/Products.vue')
+        },
+        {
+          path: '/workshop/tools',
+          name: 'tools',
+          component: () => import('../pages/workshop/Tools.vue')
+        },
+        {
+          path: '/workshop/materials',
+          name: 'materials',
+          component: () => import('../pages/workshop/Materials.vue')
+        },
+        {
+          path: '/workshop/services',
+          name: 'services',
+          component: () => import('../pages/workshop/Services.vue')
+        },
+        {
+          path: '/workshop/folders',
+          name: 'folders',
+          component: () => import('../pages/workshop/Folders.vue')
+        },
+        {
+          path: '/workshop/folder-item/:id',
+          name: 'folder-item',
+          props: true,
+          component: () => import('../pages/workshop/FolderItem.vue')
+        }
+      ]
     },
     {
       path: '/profile',

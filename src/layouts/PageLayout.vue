@@ -1,9 +1,16 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 59px);" class="page-layout">
+  <div class="page-layout" style="height: calc(100vh - 59px);">
     <slot name="content" />
-  </n-scrollbar>
+  </div>
 </template>
 <script setup lang="ts">
-import { NScrollbar } from 'naive-ui'
 </script>
-<style scoped></style>
+<style scoped>
+.page-layout {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+</style>

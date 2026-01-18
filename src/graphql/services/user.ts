@@ -8,6 +8,7 @@ import { REFRESH_TOKEN, type RefreshTokenResult } from '../mutations/refresh-tok
 import { ACTIVATE_USER, type ActivateUserResult } from '../mutations/activate-user'
 import { REGISTER_USER, type RegisterUserByTelegramInput, type RegisterUserResult } from '../mutations/create-user'
 import { UPDATE_USER, type UpdateUserInput, type UpdateUserResult } from '../mutations/update-user'
+import { UPDATE_USER_STATUS, type UpdateUserStatusInput, type UpdateUserStatusResult } from '../mutations/update-user-status'
 import { SEND_TO_CHANNEL, type SendToChannelInput, type SendToChannelResult } from '../mutations/send-to-channel'
 import { LOGIN_BY_TELEGRAM_ID, type LoginByTelegramIdResult } from '../mutations/login-by-telegram-id'
 import { LOGOUT, type LogoutResult } from '../mutations/logout'
@@ -107,6 +108,15 @@ const updateUser = async (input: UpdateUserInput) => {
   })
 }
 
+const updateUserStatus = async (input: UpdateUserStatusInput) => {
+  return await client.mutate<UpdateUserStatusResult>({
+    mutation: UPDATE_USER_STATUS,
+    variables: {
+      input
+    }
+  })
+}
+
 const logout = async (token: string) => {
   return await client.mutate<LogoutResult>({
     mutation: LOGOUT,
@@ -125,6 +135,7 @@ export {
   activateUser,
   registerUserByTelegram,
   updateUser,
+  updateUserStatus,
   sendToChannel,
   loginByTelegramId,
   logout

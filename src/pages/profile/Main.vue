@@ -1,38 +1,63 @@
 <template>
-  <div class="flex flex-col grow gap-6">
-    <div class="flex flex-col gap-2 p-4 bg-[#155a5a]">
-      <div class="flex items-center gap-4">
+  <div class="flex flex-col grow gap-4">
+    <div class="flex flex-col gap-2 pb-[60px]">
+      <div class="flex bg-[#155a5a] min-h-[160px] relative">
+        <div class="flex items-end gap-4 p-4 absolute -bottom-[74px] left-0 w-full">
         <div class="flex">
           <n-avatar
-            round
-            :size="56"
+            :size="96"
             :src="userAvatar"
+            style="border: 2px solid #fff; border-radius: 15px;"
           />
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-white text-lg font-bold">{{ userName }}</span>
-          <span v-if="userDescription && userDescription.length > 0" class="text-white text-sm">{{ userDescription }}</span>
-          <n-button text>
-            <div class="flex items-center gap-2">              
-              <n-icon :size="14" color="#cfcfcf">
-                <Edit />
-              </n-icon>
-              <span class="text-[#cfcfcf] text-sm">{{ $t('edit_description') }}</span>
-            </div>
-          </n-button>
+          <span class="text-[#000000] text-lg font-bold">{{ userName }}</span>
+          <StatusUser />
         </div>
       </div>
+      </div>
     </div>
+    <CounterMain :counterFollowers="100" :counterLikes="100000" :counterProducts="25" />
+    <InfoUser />
+    <div class="flex px-4">
+      <n-tabs type="segment" animated>
+        <n-tab-pane name="about" :tab="t('about_tab')">
+          <About />
+        </n-tab-pane>
+        <n-tab-pane name="statistics" :tab="t('statistics_tab')">
+          <Statistics />
+        </n-tab-pane>
+        <n-tab-pane name="orders">
+          <template #tab>
+            <div class="flex items-center gap-2">
+              <span>{{ t('orders_tab') }}</span>
+              <n-badge :value="valueOrders" />
+            </div>
+          </template>
+          <Orders />
+        </n-tab-pane>
+      </n-tabs>
+    </div>
+ 
   </div>
 </template>
 
 <script setup>
-import { NAvatar, NButton, NIcon } from 'naive-ui'
+import { NAvatar, NButton, NIcon, NTabs, NTabPane, NBadge } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Edit } from '@vicons/carbon'
+import { Edit, Location } from '@vicons/carbon'
 import { useTelegramUser } from '@/composables/useTelegramUser'
+import CounterMain from './components/CounterMain.vue'
+import { useI18n } from 'vue-i18n'
+import About from './components/mainTabs/About.vue'
+import Orders from './components/mainTabs/Orders.vue'
+import Statistics from './components/mainTabs/Statistics.vue'
+import InfoUser from './components/InfoUser.vue'
+import StatusUser from './components/StatusUser.vue'
+
+const { t } = useI18n()
 
 const userStore = useUserStore()
 const { currentUser } = storeToRefs(userStore)
@@ -51,5 +76,9 @@ const userAvatar = computed(() => {
 
 const userDescription = computed(() => {
   return currentUser.value?.description || ''
+})
+
+const valueOrders = computed(() => {
+  return 10
 })
 </script>

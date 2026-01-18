@@ -11,7 +11,7 @@ import { loginByTelegramId } from '@/graphql/services/user'
 import { ChevronCircleRight48Regular } from '@vicons/fluent'
 import { useI18n } from 'vue-i18n'
 import Drawer from '@/components/ui/Drawer.vue'
-import Button from '@/components/ui/Button.vue'
+import DButton from '@/components/ui/DButton.vue'
 const { t } = useI18n()
 
 const router = useRouter()
@@ -526,7 +526,7 @@ onMounted(() => {
         <div class="flex flex-col grow">
           <h2 class="text-2xl font-bold">{{ t('login_title') }}</h2>
           <div class="flex flex-col justify-end grow">
-            <Button title="Login" :color="'#000000'" :textColor="'white'" @click="handleTestLogin" />
+            <DButton title="Login" :color="'#000000'" :textColor="'white'" @click="handleTestLogin" />
           </div>
         </div>
       </template>

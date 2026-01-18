@@ -33,6 +33,20 @@ import {
   type DetachSpecializationFromUserInput,
   type DetachSpecializationFromUserResult
 } from '../mutations/detach-specialization-from-user'
+import {
+  CREATE_SPECIALIZATION,
+  type CreateSpecializationInput,
+  type CreateSpecializationResult
+} from '../mutations/create-specialization'
+import {
+  UPDATE_SPECIALIZATION,
+  type UpdateSpecializationInput,
+  type UpdateSpecializationResult
+} from '../mutations/update-specialization'
+import {
+  DELETE_SPECIALIZATION,
+  type DeleteSpecializationResult
+} from '../mutations/delete-specialization'
 
 // ============================================
 // QUERY ЗАПРОСЫ (чтение данных)
@@ -146,6 +160,36 @@ const detachSpecializationFromUser = async (input: DetachSpecializationFromUserI
   })
 }
 
+/**
+ * Создать специализацию
+ */
+const createSpecialization = async (input: CreateSpecializationInput) => {
+  return await client.mutate<CreateSpecializationResult>({
+    mutation: CREATE_SPECIALIZATION,
+    variables: { input }
+  })
+}
+
+/**
+ * Обновить специализацию
+ */
+const updateSpecialization = async (input: UpdateSpecializationInput) => {
+  return await client.mutate<UpdateSpecializationResult>({
+    mutation: UPDATE_SPECIALIZATION,
+    variables: { input }
+  })
+}
+
+/**
+ * Удалить специализацию
+ */
+const deleteSpecialization = async (specializationId: string) => {
+  return await client.mutate<DeleteSpecializationResult>({
+    mutation: DELETE_SPECIALIZATION,
+    variables: { specializationId }
+  })
+}
+
 export {
   // Queries
   getAllSpecializations,
@@ -158,5 +202,8 @@ export {
   getUserWithSpecializations,
   // Mutations
   attachSpecializationToUser,
-  detachSpecializationFromUser
+  detachSpecializationFromUser,
+  createSpecialization,
+  updateSpecialization,
+  deleteSpecialization
 }

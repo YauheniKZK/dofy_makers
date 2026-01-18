@@ -24,6 +24,8 @@ export const LOGIN_BY_TELEGRAM_ID = gql`
           name
           email
           telegramId
+          activated
+          status
           avatarUrl
           description
           shortDescription
