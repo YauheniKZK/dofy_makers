@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { NConfigProvider, NModalProvider, NMessageProvider, NNotificationProvider } from 'naive-ui';
 import Main from '@/layouts/Main.vue'
+import eruda from 'eruda';
+
+eruda.init();
 </script>
 
 <template>
