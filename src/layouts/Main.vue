@@ -20,7 +20,7 @@ const showBottomNavigation = computed(() => {
     <RouterView 
       :class="[
         'flex flex-col grow',
-        showBottomNavigation ? 'pb-16' : ''
+        showBottomNavigation ? 'pb-19' : ''
       ]" 
     />
     <BottomNavigation v-if="showBottomNavigation" />

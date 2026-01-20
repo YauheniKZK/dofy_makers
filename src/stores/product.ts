@@ -6,6 +6,7 @@ import {
   getProductStages,
   getProductStage,
   createProduct,
+  createBundleFromProducts,
   updateProduct,
   deleteProduct,
   attachTagsToProduct,
@@ -19,6 +20,7 @@ import {
 import type { Product } from '@/graphql/queries/get-products'
 import type { ProductStage } from '@/graphql/queries/get-product-stages'
 import type { CreateProductInput } from '@/graphql/mutations/create-product'
+import type { CreateBundleFromProductsInput } from '@/graphql/mutations/create-bundle-from-products'
 import type { UpdateProductInput } from '@/graphql/mutations/update-product'
 import type { AttachTagsToProductInput } from '@/graphql/mutations/attach-tags-to-product'
 import type { RemoveTagFromProductInput } from '@/graphql/mutations/remove-tag-from-product'
@@ -67,6 +69,7 @@ export const useProductStore = defineStore('product', () => {
   const getProductStagesApiData = ref<ApiState<ProductStage[]>>(createDefaultApiState<ProductStage[]>())
   const getProductStageApiData = ref<ApiState<ProductStage>>(createDefaultApiState<ProductStage>())
   const createProductApiData = ref<ApiState<Product>>(createDefaultApiState<Product>())
+  const createBundleFromProductsApiData = ref<ApiState<Product>>(createDefaultApiState<Product>())
   const updateProductApiData = ref<ApiState<Product>>(createDefaultApiState<Product>())
   const deleteProductApiData = ref<ApiState<boolean>>(createDefaultApiState<boolean>())
   const attachTagsToProductApiData = ref<ApiState<Product>>(createDefaultApiState<Product>())
@@ -89,6 +92,7 @@ export const useProductStore = defineStore('product', () => {
   const getProductStagesApiDataGetters = computed(() => getProductStagesApiData.value)
   const getProductStageApiDataGetters = computed(() => getProductStageApiData.value)
   const createProductApiDataGetters = computed(() => createProductApiData.value)
+  const createBundleFromProductsApiDataGetters = computed(() => createBundleFromProductsApiData.value)
   const updateProductApiDataGetters = computed(() => updateProductApiData.value)
   const deleteProductApiDataGetters = computed(() => deleteProductApiData.value)
   const attachTagsToProductApiDataGetters = computed(() => attachTagsToProductApiData.value)
@@ -250,6 +254,40 @@ export const useProductStore = defineStore('product', () => {
       return null
     } finally {
       createProductApiData.value.loading = false
+    }
+  }
+
+  // Создать набор из существующих товаров
+  const createBundleFromProductsAction = async (input: CreateBundleFromProductsInput): Promise<Product | null> => {
+    resetApiState(createBundleFromProductsApiData.value)
+    createBundleFromProductsApiData.value.loading = true
+
+    try {
+      const response = await createBundleFromProducts(input)
+
+      if (response.data?.createBundleFromProducts?.successfully && response.data.createBundleFromProducts.data) {
+        const bundle = response.data.createBundleFromProducts.data as any
+        createBundleFromProductsApiData.value.data = bundle
+        createBundleFromProductsApiData.value.success = true
+        createBundleFromProductsApiData.value.message = response.data.createBundleFromProducts.message || 'Набор создан'
+        
+        // Добавляем в список продуктов
+        products.value.unshift(bundle)
+        
+        return bundle
+      } else {
+        const errorMsg = response.data?.createBundleFromProducts?.error || response.data?.createBundleFromProducts?.message || 'Ошибка создания набора'
+        createBundleFromProductsApiData.value.error = true
+        createBundleFromProductsApiData.value.message = errorMsg
+        return null
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Ошибка создания набора'
+      createBundleFromProductsApiData.value.error = true
+      createBundleFromProductsApiData.value.message = errorMessage
+      return null
+    } finally {
+      createBundleFromProductsApiData.value.loading = false
     }
   }
 
@@ -608,6 +646,7 @@ export const useProductStore = defineStore('product', () => {
     getProductStagesApiData,
     getProductStageApiData,
     createProductApiData,
+    createBundleFromProductsApiData,
     updateProductApiData,
     deleteProductApiData,
     attachTagsToProductApiData,
@@ -630,6 +669,7 @@ export const useProductStore = defineStore('product', () => {
     getProductStagesApiDataGetters,
     getProductStageApiDataGetters,
     createProductApiDataGetters,
+    createBundleFromProductsApiDataGetters,
     updateProductApiDataGetters,
     deleteProductApiDataGetters,
     attachTagsToProductApiDataGetters,
@@ -646,6 +686,7 @@ export const useProductStore = defineStore('product', () => {
     fetchProductStages,
     fetchProductStage,
     createProductAction,
+    createBundleFromProductsAction,
     updateProductAction,
     deleteProductAction,
     attachTagsToProductAction,

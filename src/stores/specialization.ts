@@ -208,7 +208,7 @@ export const useSpecializationStore = defineStore('specialization', () => {
   }
 
   // Получить специализации пользователя
-  const fetchUserSpecializations = async (userId: string): Promise<void> => {
+  const userSpecializationsAction = async (userId: string): Promise<void> => {
     resetApiState(getUserSpecializationsApiData.value)
     getUserSpecializationsApiData.value.loading = true
 
@@ -518,7 +518,7 @@ export const useSpecializationStore = defineStore('specialization', () => {
     fetchSystemSpecializations,
     fetchPatientSpecializations,
     fetchSpecializationById,
-    fetchUserSpecializations,
+    userSpecializationsAction,
     fetchMeWithSpecializations,
     attachSpecializationToUserAction,
     detachSpecializationFromUserAction,

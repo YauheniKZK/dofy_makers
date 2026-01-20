@@ -4,6 +4,7 @@ import { GET_PRODUCT, type GetProductResult } from '../queries/get-product'
 import { GET_PRODUCT_STAGES, type GetProductStagesResult } from '../queries/get-product-stages'
 import { GET_PRODUCT_STAGE, type GetProductStageResult } from '../queries/get-product-stage'
 import { CREATE_PRODUCT, type CreateProductInput, type CreateProductResult } from '../mutations/create-product'
+import { CREATE_BUNDLE_FROM_PRODUCTS, type CreateBundleFromProductsInput, type CreateBundleFromProductsResult } from '../mutations/create-bundle-from-products'
 import { UPDATE_PRODUCT, type UpdateProductInput, type UpdateProductResult } from '../mutations/update-product'
 import { DELETE_PRODUCT, type DeleteProductResult } from '../mutations/delete-product'
 import { ATTACH_TAGS_TO_PRODUCT, type AttachTagsToProductInput, type AttachTagsToProductResult } from '../mutations/attach-tags-to-product'
@@ -64,6 +65,16 @@ export const getProductStage = async (id: string) => {
 export const createProduct = async (input: CreateProductInput) => {
   return await client.mutate<CreateProductResult>({
     mutation: CREATE_PRODUCT,
+    variables: { input }
+  })
+}
+
+/**
+ * Создать набор из существующих товаров
+ */
+export const createBundleFromProducts = async (input: CreateBundleFromProductsInput) => {
+  return await client.mutate<CreateBundleFromProductsResult>({
+    mutation: CREATE_BUNDLE_FROM_PRODUCTS,
     variables: { input }
   })
 }

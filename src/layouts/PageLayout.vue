@@ -1,5 +1,5 @@
 <template>
-  <div class="page-layout" style="height: calc(100vh - 59px);">
+  <div class="page-layout" style="height: calc(100vh - 75px);">
     <slot name="content" />
   </div>
 </template>

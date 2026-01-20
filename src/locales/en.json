@@ -15,7 +15,7 @@
   "counter_followers": "Followers",
   "counter_likes": "Likes",
   "counter_products": "Products",
-  "about_tab": "About",
+  "info_tab": "Info",
   "orders_tab": "Orders",
   "statistics_tab": "Statistics",
   "products_title": "My Works",
@@ -61,5 +61,15 @@
   "user_status_inactive_description": "Your status is inactive",
   "user_status_active_button": "Activate",
   "user_status_inactive_button": "Deactivate",
-  "no_description": "No description yet"
+  "no_description": "No description yet",
+  "about_me_title": "About me",
+  "specializations_title": "Specializations",
+  "product_type_bundle": "Bundle",
+  "bundle_items_count": "Items in bundle: {count}",
+  "bundle_create_title": "Create bundle",
+  "bundle_create_description": "Combine multiple products into a bundle",
+  "bundle_select_products": "Select products for bundle",
+  "bundle_no_items": "Bundle must contain at least one product",
+  "bundle_item_quantity": "Quantity",
+  "bundle_item_remove": "Remove"
 }

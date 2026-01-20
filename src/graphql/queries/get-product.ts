@@ -45,6 +45,14 @@ export interface ProductStage {
   order: number
 }
 
+export type ProductType = 'PRODUCT' | 'BUNDLE'
+
+export interface ProductBundleItem {
+  product: Product
+  quantity: number
+  order: number
+}
+
 export interface Product {
   id: string
   userId: string
@@ -55,6 +63,7 @@ export interface Product {
   description: string | null
   price: number
   currency: string
+  productType?: ProductType
   images: string[]
   isActive: boolean
   isPublished: boolean
@@ -62,6 +71,9 @@ export interface Product {
   tags?: Tag[]
   materials?: Material[]
   stages?: ProductStage[]
+  bundleItems?: ProductBundleItem[]
+  bundles?: Product[]
+  favoritesCount?: number
   createdAt: string
   updatedAt: string
 }
@@ -102,6 +114,7 @@ export const GET_PRODUCT = gql`
         description
         price
         currency
+        productType
         images
         isActive
         isPublished
@@ -129,6 +142,28 @@ export const GET_PRODUCT = gql`
           videoUrl
           order
         }
+        bundleItems {
+          product {
+            id
+            name
+            description
+            price
+            currency
+            images
+            isActive
+            isPublished
+          }
+          quantity
+          order
+        }
+        bundles {
+          id
+          name
+          description
+          price
+          productType
+        }
+        favoritesCount
         createdAt
         updatedAt
       }

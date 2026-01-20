@@ -15,7 +15,7 @@
   "counter_followers": "Подписчики",
   "counter_likes": "Лайки",
   "counter_products": "Изделия",
-  "about_tab": "Обо мне",
+  "info_tab": "Информация",
   "orders_tab": "Заказы",
   "statistics_tab": "Статистика",
   "products_title": "Мои работы",
@@ -61,5 +61,15 @@
   "user_status_inactive_description": "Ваш статус неактивен",
   "user_status_active_button": "Активировать",
   "user_status_inactive_button": "Деактивировать",
-  "no_description": "Нет описания"
+  "no_description": "Нет описания",
+  "about_me_title": "Обо мне",
+  "specializations_title": "Специализации",
+  "product_type_bundle": "Набор",
+  "bundle_items_count": "Товаров в наборе: {count}",
+  "bundle_create_title": "Создать набор",
+  "bundle_create_description": "Объедините несколько товаров в набор",
+  "bundle_select_products": "Выберите товары для набора",
+  "bundle_no_items": "Набор должен содержать хотя бы один товар",
+  "bundle_item_quantity": "Количество",
+  "bundle_item_remove": "Удалить"
 }

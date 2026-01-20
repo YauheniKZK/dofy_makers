@@ -27,6 +27,14 @@ export interface ProductSubcategory {
   name: string
 }
 
+export type ProductType = 'PRODUCT' | 'BUNDLE'
+
+export interface ProductBundleItem {
+  product: Product
+  quantity: number
+  order: number
+}
+
 export interface Product {
   id: string
   userId: string
@@ -37,12 +45,16 @@ export interface Product {
   description: string | null
   price: number
   currency: string
+  productType?: ProductType
   images: string[]
   isActive: boolean
   isPublished: boolean
   allowCoupons: boolean
   tags?: Tag[]
   materials?: Material[]
+  bundleItems?: ProductBundleItem[]
+  bundles?: Product[]
+  favoritesCount?: number
   createdAt: string
   updatedAt: string
 }
@@ -82,6 +94,7 @@ export const GET_PRODUCTS = gql`
           description
           price
           currency
+          productType
           images
           isActive
           isPublished
@@ -99,6 +112,18 @@ export const GET_PRODUCTS = gql`
               name
             }
           }
+          bundleItems {
+            product {
+              id
+              name
+            }
+            quantity
+          }
+          bundles {
+            id
+            name
+          }
+          favoritesCount
           createdAt
           updatedAt
         }

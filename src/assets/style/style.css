@@ -15,6 +15,7 @@ body, html {
   height: 100%;
   overflow: hidden;
   background-color: #fff;
+  touch-action: manipulation;
 }
 
 #app {
@@ -45,12 +46,17 @@ body, html {
   border-radius: 15px 15px 0 0;
   box-shadow: rgba(0, 0, 0, 0.16) 0px -1px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
   z-index: 1999;
-  padding-bottom: env(safe-area-inset-bottom);
+
+
+}
+
+.bottom-navigation .n-tabs {
   --n-tab-border-radius: 15px !important;
   --n-tab-color-segment: #155a5a !important;
   --n-tab-text-color-active: rgb(255, 255, 255) !important;
   --n-tab-text-color-hover: rgb(255, 255, 255) !important;
   --n-tab-text-color: rgb(31, 34, 37) !important;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Стили для PageLayout - больше не используются, т.к. убрали n-scrollbar */
@@ -63,4 +69,22 @@ body, html {
 .n-base-selection  {
   --n-border-radius: 15px !important;
   --n-height: 48px !important;
+}
+
+/* Предотвращение масштабирования при фокусе на input элементы */
+input,
+textarea,
+select,
+.n-input input,
+.n-input textarea,
+.n-base-selection input {
+  font-size: 16px !important;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Предотвращение масштабирования при двойном клике */
+* {
+  touch-action: manipulation;
 }

@@ -21,7 +21,7 @@
     <InfoUser />
     <div class="flex px-4">
       <n-tabs type="segment" animated>
-        <n-tab-pane name="about" :tab="t('about_tab')">
+        <n-tab-pane name="about" :tab="t('info_tab')">
           <About />
         </n-tab-pane>
         <n-tab-pane name="statistics" :tab="t('statistics_tab')">
@@ -45,7 +45,7 @@
 <script setup>
 import { NAvatar, NButton, NIcon, NTabs, NTabPane, NBadge } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Edit, Location } from '@vicons/carbon'
 import { useTelegramUser } from '@/composables/useTelegramUser'
@@ -56,11 +56,15 @@ import Orders from './components/mainTabs/Orders.vue'
 import Statistics from './components/mainTabs/Statistics.vue'
 import InfoUser from './components/InfoUser.vue'
 import StatusUser from './components/StatusUser.vue'
+import { useSpecializationStore } from '@/stores/specialization'
 
 const { t } = useI18n()
 
 const userStore = useUserStore()
 const { currentUser } = storeToRefs(userStore)
+
+const specializationStore = useSpecializationStore()
+const { userSpecializationsAction } = specializationStore
 
 // Получаем данные из Telegram WebApp (включая аватар)
 const { userAvatar: telegramAvatar, userFullName: telegramFullName } = useTelegramUser()
@@ -80,5 +84,14 @@ const userDescription = computed(() => {
 
 const valueOrders = computed(() => {
   return 10
+})
+
+const fetchUserSpecializations = async () => {
+  await userSpecializationsAction(currentUser.value?.id)
+} 
+
+// Загружаем специализации пользователя при монтировании компонента
+onMounted(async () => {
+  await fetchUserSpecializations()
 })
 </script>

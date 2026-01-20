@@ -1,46 +1,47 @@
 <template>
   <div class="flex flex-col gap-2">
-      <n-blockquote>
-        <span v-if="userDescription && userDescription.length > 0" class="text-[#000000] text-sm">{{ userDescription }}</span>
-        <n-button  text @click="handleEditDescription">
-          <div class="flex items-center gap-2">              
-            <n-icon :size="14" color="#a7a4a4">
-              <Edit />
-            </n-icon>
-            <span class="text-[#a7a4a4] text-sm">{{ $t('edit_description') }}</span>
-          </div>
-        </n-button>
-      </n-blockquote>
-      <Drawer :showModal="showEditDescriptionModal" @close="showEditDescriptionModal = false">
-        <template #content>
-          <quill-editor
-            ref="editorFR"
-            theme="snow"
-            style="min-height: 280px;"
-            v-model:content="dataForm"
-            @ready="editorEvent"
-            @update:content="(content) => changeContent(content, 'fr')"
-            placeholder="Enter description"
-            @focus="(event) => focusEditor(event, 'fr')"
-            maxlength="6"
-            :toolbar="[
-              {'header': ['normal', 3, 2, 1]},
-              'bold',
-              'italic',
-              'underline',
-              'strike',
-              'link',
-              { 'list': 'ordered'},
-              { 'list': 'bullet' },
-              { 'align': [] },
-              { 'color': [] },
-              { 'background': [] },
-              'code-block'
-            ]"
-          />
-        </template>
-      </Drawer>
-    </div>
+    <span class="text-[#000000] text-lg font-bold">{{ $t('about_me_title') }}</span>
+    <n-blockquote>
+      <span v-if="userDescription && userDescription.length > 0" class="text-[#000000] text-sm">{{ userDescription }}</span>
+      <n-button  text @click="handleEditDescription">
+        <div class="flex items-center gap-2">              
+          <n-icon :size="14" color="#a7a4a4">
+            <Edit />
+          </n-icon>
+          <span class="text-[#a7a4a4] text-sm">{{ $t('edit_description') }}</span>
+        </div>
+      </n-button>
+    </n-blockquote>
+    <Drawer :showModal="showEditDescriptionModal" :isShowCloseButton="true" @close="showEditDescriptionModal = false">
+      <template #content>
+        <quill-editor
+          ref="editorFR"
+          theme="snow"
+          style="min-height: 280px;"
+          v-model:content="dataForm"
+          @ready="editorEvent"
+          @update:content="(content) => changeContent(content, 'fr')"
+          placeholder="Enter description"
+          @focus="(event) => focusEditor(event, 'fr')"
+          maxlength="6"
+          :toolbar="[
+            {'header': ['normal', 3, 2, 1]},
+            'bold',
+            'italic',
+            'underline',
+            'strike',
+            'link',
+            { 'list': 'ordered'},
+            { 'list': 'bullet' },
+            { 'align': [] },
+            { 'color': [] },
+            { 'background': [] },
+            'code-block'
+          ]"
+        />
+      </template>
+    </Drawer>
+  </div>
 </template>
 
 <script setup lang="ts">

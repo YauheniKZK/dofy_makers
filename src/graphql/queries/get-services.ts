@@ -37,6 +37,7 @@ export interface Service {
   allowCoupons: boolean
   tags?: Tag[]
   materials?: Material[]
+  favoritesCount?: number
   createdAt: string
   updatedAt: string
 }
@@ -89,6 +90,7 @@ export const GET_SERVICES = gql`
             id
             name
           }
+          favoritesCount
           createdAt
           updatedAt
         }

@@ -43,16 +43,18 @@ const navigate = (value: string) => {
 </script>
 
 <template>
-  <n-tabs type="segment" animated class="bottom-navigation" @update:value="navigate">
-    <n-tab v-for="item in navItems" :key="item.key" :name="item.key">
-      <div class="flex flex-col items-center">
-        <n-icon :size="22">
-          <component :is="item.icon" />
-        </n-icon>
-        <span class="nav-label">{{ item.name }}</span>
-      </div>
-    </n-tab>
-  </n-tabs>
+  <div class="flex pb-4 bottom-navigation">
+    <n-tabs type="segment" animated  @update:value="navigate">
+      <n-tab v-for="item in navItems" :key="item.key" :name="item.key">
+        <div class="flex flex-col items-center">
+          <n-icon :size="22">
+            <component :is="item.icon" />
+          </n-icon>
+          <span class="nav-label">{{ item.name }}</span>
+        </div>
+      </n-tab>
+    </n-tabs>
+  </div>
 </template>
 
 <style scoped>
