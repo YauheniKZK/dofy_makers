@@ -132,8 +132,11 @@ const liftFormElement = async (element: HTMLElement) => {
     pointer-events: auto;
   `
   
-  // Делаем оригинальный элемент невидимым
-  container.style.opacity = '0'
+  // Делаем оригинальный элемент невидимым, но сохраняем его видимость для фокуса
+  // Используем visibility вместо opacity, чтобы не терять фокус
+  container.style.visibility = 'hidden'
+  container.style.position = 'absolute'
+  container.style.left = '-9999px'
   container.style.pointerEvents = 'none'
   
   document.body.appendChild(clone)
@@ -182,8 +185,8 @@ const liftFormElement = async (element: HTMLElement) => {
       // Сбрасываем флаг после того как фокус установлен
       setTimeout(() => {
         isLifting.value = false
-      }, 100)
-    }, 50)
+      }, 150)
+    }, 100)
   } else {
     isLifting.value = false
   }
@@ -231,7 +234,9 @@ const returnFormElement = async () => {
   await new Promise(resolve => setTimeout(resolve, 300))
   
   // Восстанавливаем оригинальный элемент
-  original.style.opacity = '1'
+  original.style.visibility = ''
+  original.style.position = ''
+  original.style.left = ''
   original.style.pointerEvents = 'auto'
   
   // Удаляем клон
@@ -270,6 +275,12 @@ const handleFormFocus = async (event: FocusEvent) => {
       return
     }
     
+    // Проверяем, не является ли это уже клонированным элементом
+    const container = findFormContainer(target)
+    if (container && container.classList.contains('form-input-lifted')) {
+      return // Это уже поднятый элемент, игнорируем
+    }
+    
     // Если уже есть поднятый элемент, сначала возвращаем его
     if (liftedContainer.value && liftedElement.value) {
       const newContainer = findFormContainer(target)
@@ -284,17 +295,38 @@ const handleFormFocus = async (event: FocusEvent) => {
       }
     }
     
+    // Устанавливаем флаг ДО начала поднятия элемента
+    isLifting.value = true
+    
+    // Предотвращаем распространение события
+    event.stopPropagation()
+    
     liftFormElement(target)
   }
 }
 
 // Обработчик blur на элементах формы
 const handleFormBlur = (event: FocusEvent) => {
-  // Игнорируем blur во время процесса поднятия элемента
-  if (isLifting.value) return
-  
   const target = event.target as HTMLElement
+  
+  // Игнорируем blur во время процесса поднятия элемента
+  if (isLifting.value) {
+    event.stopPropagation()
+    return
+  }
+  
+  // Если нет поднятого контейнера, это обычный blur - игнорируем
   if (!liftedContainer.value) return
+  
+  // Проверяем, был ли blur на оригинальном элементе (который мы скрыли)
+  if (liftedElement.value && target) {
+    const originalInput = liftedElement.value.querySelector('input, textarea, select') as HTMLElement
+    // Если blur на оригинальном элементе - это нормально, фокус переключится на клон
+    if (originalInput && (target === originalInput || liftedElement.value.contains(target))) {
+      event.stopPropagation()
+      return
+    }
+  }
   
   // Проверяем, был ли blur на клонированном элементе
   const clonedInput = liftedContainer.value?.querySelector('input, textarea, select') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -316,9 +348,6 @@ const handleFormBlur = (event: FocusEvent) => {
         returnFormElement()
       }
     }, 200)
-  } else if (liftedElement.value && target) {
-    // Blur на оригинальном элементе - игнорируем, так как фокус должен переключиться на клон
-    // Это нормальное поведение при клонировании
   }
 }
 
