@@ -72,9 +72,14 @@ const findFormContainer = (element: HTMLElement): HTMLElement | null => {
 
 // Поднять элемент формы к верху экрана
 const liftFormElement = async (element: HTMLElement) => {
+  console.log('[LIFT] liftFormElement вызван')
   const container = findFormContainer(element)
-  if (!container) return
+  if (!container) {
+    console.log('[LIFT] Контейнер не найден')
+    return
+  }
   
+  console.log('[LIFT] Контейнер найден, начинаем поднятие')
   // Устанавливаем флаг процесса поднятия
   isLifting.value = true
   
@@ -87,6 +92,10 @@ const liftFormElement = async (element: HTMLElement) => {
   }
   
   liftedElement.value = container
+  console.log('[LIFT] Состояние установлено', {
+    isLifting: isLifting.value,
+    hasLiftedElement: !!liftedElement.value
+  })
   
   // Создаем overlay если его еще нет
   if (!overlayElement.value) {
@@ -102,7 +111,11 @@ const liftFormElement = async (element: HTMLElement) => {
       z-index: 2998;
       opacity: 0;
       transition: opacity 0.3s ease;
+      pointer-events: auto;
     `
+    
+    // Overlay должен пропускать клики на поднятый элемент
+    // Но блокировать клики вне его
     document.body.appendChild(overlay)
     overlayElement.value = overlay
     
@@ -130,14 +143,31 @@ const liftFormElement = async (element: HTMLElement) => {
     z-index: 2999;
     transition: top 0.3s ease, left 0.3s ease, width 0.3s ease;
     pointer-events: auto;
+    background-color: #fff;
   `
   
-  // Делаем оригинальный элемент невидимым, но сохраняем его видимость для фокуса
-  // Используем visibility вместо opacity, чтобы не терять фокус
+  // Убеждаемся, что все интерактивные элементы внутри клона работают
+  const interactiveElements = clone.querySelectorAll('input, textarea, select, button')
+  interactiveElements.forEach((el: Element) => {
+    const htmlEl = el as HTMLElement
+    htmlEl.style.pointerEvents = 'auto'
+    htmlEl.removeAttribute('disabled')
+    htmlEl.removeAttribute('readonly')
+  })
+  
+  // Делаем оригинальный элемент невидимым, но сохраняем его размеры и место в потоке
+  // Сохраняем оригинальные стили для восстановления
+  const originalHeight = container.offsetHeight
+  const originalWidth = container.offsetWidth
+  
   container.style.visibility = 'hidden'
-  container.style.position = 'absolute'
-  container.style.left = '-9999px'
+  container.style.opacity = '0'
   container.style.pointerEvents = 'none'
+  // Сохраняем высоту и ширину, чтобы родительский контейнер не менял размеры
+  container.style.minHeight = `${originalHeight}px`
+  container.style.height = `${originalHeight}px`
+  container.style.minWidth = `${originalWidth}px`
+  container.style.width = `${originalWidth}px`
   
   document.body.appendChild(clone)
   liftedContainer.value = clone
@@ -178,24 +208,87 @@ const liftFormElement = async (element: HTMLElement) => {
     // Сохраняем обработчики для очистки
     ;(clone as any)._syncHandlers = { syncValues, clonedInput, originalInput }
     
+    // Убеждаемся, что клонированный input не disabled и не readonly
+    if ('disabled' in clonedInput) {
+      (clonedInput as any).disabled = false
+    }
+    if ('readOnly' in clonedInput) {
+      (clonedInput as any).readOnly = false
+    }
+    
+    // Убеждаемся, что элемент интерактивен
+    clonedInput.style.pointerEvents = 'auto'
+    clonedInput.tabIndex = 0
+    
     // Фокусируем клонированный элемент с небольшой задержкой
     // чтобы убедиться, что все DOM операции завершены
     setTimeout(() => {
-      clonedInput.focus()
-      // Сбрасываем флаг после того как фокус установлен
-      setTimeout(() => {
-        isLifting.value = false
-      }, 150)
-    }, 100)
+      console.log('[LIFT] Устанавливаем фокус на клонированный элемент')
+      
+      // Убираем фокус со всех элементов перед установкой на клон
+      if (document.activeElement && document.activeElement !== clonedInput) {
+        (document.activeElement as HTMLElement).blur()
+      }
+      
+      // Используем requestAnimationFrame для надежной установки фокуса
+      requestAnimationFrame(() => {
+        clonedInput.focus({ preventScroll: false })
+        console.log('[LIFT] Фокус установлен, activeElement:', document.activeElement?.tagName, 'is:', document.activeElement === clonedInput)
+        
+        // Проверяем, что фокус действительно установлен
+        if (document.activeElement === clonedInput) {
+          // Сбрасываем флаг после того как фокус установлен
+          setTimeout(() => {
+            console.log('[LIFT] Сбрасываем флаг isLifting')
+            isLifting.value = false
+            console.log('[LIFT] Флаг сброшен, activeElement:', document.activeElement?.tagName)
+          }, 200)
+        } else {
+          console.log('[LIFT] ОШИБКА: Фокус не установлен на клонированный элемент!', {
+            expected: clonedInput,
+            actual: document.activeElement
+          })
+          // Пытаемся еще раз
+          setTimeout(() => {
+            clonedInput.focus({ preventScroll: false })
+            if (document.activeElement === clonedInput) {
+              setTimeout(() => {
+                isLifting.value = false
+              }, 200)
+            } else {
+              console.log('[LIFT] КРИТИЧЕСКАЯ ОШИБКА: Не удалось установить фокус')
+              isLifting.value = false
+            }
+          }, 100)
+        }
+      })
+    }, 150)
   } else {
+    console.log('[LIFT] Не найдены input элементы, сбрасываем флаг')
     isLifting.value = false
   }
 }
 
 // Вернуть элемент на место
 const returnFormElement = async () => {
-  if (!liftedContainer.value || !liftedElement.value || !originalPosition.value) return
+  console.log('[RETURN] returnFormElement вызван', {
+    isLifting: isLifting.value,
+    hasLiftedContainer: !!liftedContainer.value,
+    hasLiftedElement: !!liftedElement.value
+  })
   
+  // Не возвращаем элемент во время процесса поднятия
+  if (isLifting.value) {
+    console.log('[RETURN] Игнорируем - идет процесс поднятия')
+    return
+  }
+  
+  if (!liftedContainer.value || !liftedElement.value || !originalPosition.value) {
+    console.log('[RETURN] Нет данных для возврата')
+    return
+  }
+  
+  console.log('[RETURN] Начинаем возврат элемента')
   // Устанавливаем флаг, чтобы предотвратить обработку blur во время возврата
   isLifting.value = true
   
@@ -235,9 +328,12 @@ const returnFormElement = async () => {
   
   // Восстанавливаем оригинальный элемент
   original.style.visibility = ''
-  original.style.position = ''
-  original.style.left = ''
+  original.style.opacity = ''
   original.style.pointerEvents = 'auto'
+  original.style.minHeight = ''
+  original.style.height = ''
+  original.style.minWidth = ''
+  original.style.width = ''
   
   // Удаляем клон
   if (container.parentNode) {
@@ -262,41 +358,65 @@ const returnFormElement = async () => {
   }
   
   // Сбрасываем флаг после завершения возврата
+  console.log('[RETURN] Возврат завершен, сбрасываем флаг')
   isLifting.value = false
 }
 
 // Обработчик фокуса на элементах формы
 const handleFormFocus = async (event: FocusEvent) => {
   const target = event.target as HTMLElement
+  console.log('[FOCUS] handleFormFocus вызван', {
+    tagName: target?.tagName,
+    type: (target as HTMLInputElement)?.type,
+    isLifting: isLifting.value,
+    hasLiftedContainer: !!liftedContainer.value,
+    activeElement: document.activeElement?.tagName
+  })
+  
+  // Игнорируем фокус на других элементах во время поднятия
+  if (isLifting.value && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && target.tagName !== 'SELECT') {
+    console.log('[FOCUS] Игнорируем фокус на', target.tagName, '- идет процесс поднятия')
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+  
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
     const input = target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     // Проверяем тип input - пропускаем checkbox, radio, button
     if (input.type === 'checkbox' || input.type === 'radio' || input.type === 'button' || input.type === 'submit') {
+      console.log('[FOCUS] Пропущен тип input:', input.type)
       return
     }
     
     // Проверяем, не является ли это уже клонированным элементом
     const container = findFormContainer(target)
     if (container && container.classList.contains('form-input-lifted')) {
+      console.log('[FOCUS] Это уже поднятый элемент, игнорируем')
       return // Это уже поднятый элемент, игнорируем
     }
     
     // Если уже есть поднятый элемент, сначала возвращаем его
     if (liftedContainer.value && liftedElement.value) {
+      console.log('[FOCUS] Уже есть поднятый элемент, проверяем...')
       const newContainer = findFormContainer(target)
       // Если это не тот же элемент, возвращаем предыдущий
       if (!newContainer || newContainer !== liftedElement.value) {
+        console.log('[FOCUS] Возвращаем предыдущий элемент')
         await returnFormElement()
         // Небольшая задержка перед поднятием нового элемента
         await new Promise(resolve => setTimeout(resolve, 100))
       } else {
+        console.log('[FOCUS] Это тот же элемент, не делаем ничего')
         // Это тот же элемент - не делаем ничего
         return
       }
     }
     
+    console.log('[FOCUS] Начинаем поднятие элемента')
     // Устанавливаем флаг ДО начала поднятия элемента
     isLifting.value = true
+    console.log('[FOCUS] isLifting установлен в true')
     
     // Предотвращаем распространение события
     event.stopPropagation()
@@ -309,20 +429,34 @@ const handleFormFocus = async (event: FocusEvent) => {
 const handleFormBlur = (event: FocusEvent) => {
   const target = event.target as HTMLElement
   
+  console.log('[BLUR] handleFormBlur вызван', {
+    tagName: target?.tagName,
+    isLifting: isLifting.value,
+    hasLiftedContainer: !!liftedContainer.value,
+    hasLiftedElement: !!liftedElement.value,
+    activeElement: document.activeElement?.tagName,
+    targetIsCloned: target?.closest('.form-input-lifted') !== null
+  })
+  
   // Игнорируем blur во время процесса поднятия элемента
   if (isLifting.value) {
+    console.log('[BLUR] Игнорируем blur - идет процесс поднятия')
     event.stopPropagation()
     return
   }
   
   // Если нет поднятого контейнера, это обычный blur - игнорируем
-  if (!liftedContainer.value) return
+  if (!liftedContainer.value) {
+    console.log('[BLUR] Нет поднятого контейнера, игнорируем')
+    return
+  }
   
   // Проверяем, был ли blur на оригинальном элементе (который мы скрыли)
   if (liftedElement.value && target) {
     const originalInput = liftedElement.value.querySelector('input, textarea, select') as HTMLElement
     // Если blur на оригинальном элементе - это нормально, фокус переключится на клон
     if (originalInput && (target === originalInput || liftedElement.value.contains(target))) {
+      console.log('[BLUR] Blur на оригинальном элементе - это нормально, игнорируем')
       event.stopPropagation()
       return
     }
@@ -332,12 +466,25 @@ const handleFormBlur = (event: FocusEvent) => {
   const clonedInput = liftedContainer.value?.querySelector('input, textarea, select') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
   
   if (clonedInput && liftedContainer.value && (target === clonedInput || target.contains(clonedInput) || clonedInput.contains(target))) {
+    console.log('[BLUR] Blur на клонированном элементе, проверяем через 200ms...')
     // Небольшая задержка чтобы проверить, не переключился ли фокус на другой элемент
     setTimeout(() => {
       // Проверяем еще раз флаг поднятия
-      if (isLifting.value) return
+      if (isLifting.value) {
+        console.log('[BLUR] Все еще идет процесс поднятия, игнорируем')
+        return
+      }
       
       const activeElement = document.activeElement as HTMLElement
+      console.log('[BLUR] Проверка через 200ms', {
+        activeElement: activeElement?.tagName,
+        activeElementIsCloned: activeElement === clonedInput || liftedContainer.value?.contains(activeElement),
+        willReturn: !activeElement || !liftedContainer.value ||
+          (activeElement !== clonedInput && 
+           !clonedInput.contains(activeElement) && 
+           activeElement !== liftedContainer.value &&
+           !liftedContainer.value.contains(activeElement))
+      })
       
       // Если фокус не на клонированном элементе или его родителе, возвращаем элемент
       if (!activeElement || !liftedContainer.value ||
@@ -345,9 +492,14 @@ const handleFormBlur = (event: FocusEvent) => {
            !clonedInput.contains(activeElement) && 
            activeElement !== liftedContainer.value &&
            !liftedContainer.value.contains(activeElement))) {
+        console.log('[BLUR] Возвращаем элемент - фокус потерян')
         returnFormElement()
+      } else {
+        console.log('[BLUR] Фокус все еще на клонированном элементе, не возвращаем')
       }
     }, 200)
+  } else {
+    console.log('[BLUR] Blur не на клонированном элементе')
   }
 }
 
@@ -355,24 +507,48 @@ const handleFormBlur = (event: FocusEvent) => {
 const handleClickOutside = (event: MouseEvent | TouchEvent) => {
   const target = event.target as HTMLElement
   
+  console.log('[CLICK] handleClickOutside вызван', {
+    tagName: target?.tagName,
+    isLifting: isLifting.value,
+    hasLiftedContainer: !!liftedContainer.value,
+    targetIsOverlay: target === overlayElement.value,
+    targetInLiftedContainer: liftedContainer.value?.contains(target),
+    targetIsLiftedContainer: target === liftedContainer.value
+  })
+  
+  // Игнорируем клики во время поднятия элемента
+  if (isLifting.value) {
+    console.log('[CLICK] Игнорируем клик - идет процесс поднятия')
+    return
+  }
+  
   // Если есть поднятый элемент
   if (liftedContainer.value && overlayElement.value) {
-    // Проверяем, был ли клик на overlay (но не на самом поднятом элементе)
+    // Проверяем, был ли клик на самом поднятом элементе или его дочерних элементах
+    // Если да - не делаем ничего, элемент должен остаться в фокусе
+    if (liftedContainer.value.contains(target) || target === liftedContainer.value) {
+      console.log('[CLICK] Клик на поднятом элементе - игнорируем, элемент остается в фокусе')
+      return
+    }
+    
+    // Проверяем, был ли клик на overlay
     if (target === overlayElement.value) {
+      console.log('[CLICK] Клик на overlay - возвращаем элемент')
       // Клик на overlay - возвращаем элемент
       returnFormElement()
       return
     }
     
-    // Если клик не на поднятом элементе и не на его дочерних элементах
-    if (!liftedContainer.value.contains(target) && target !== liftedContainer.value) {
-      // Проверяем, не кликнули ли на другой элемент формы
-      const clickedFormContainer = findFormContainer(target)
-      if (!clickedFormContainer || clickedFormContainer !== liftedElement.value) {
-        // Клик вне поднятого элемента - возвращаем элемент
-        returnFormElement()
-        return
-      }
+    // Клик не на поднятом элементе и не на overlay
+    // Проверяем, не кликнули ли на другой элемент формы
+    const clickedFormContainer = findFormContainer(target)
+    if (!clickedFormContainer || clickedFormContainer !== liftedElement.value) {
+      console.log('[CLICK] Клик вне поднятого элемента - возвращаем элемент')
+      // Клик вне поднятого элемента - возвращаем элемент
+      returnFormElement()
+      return
+    } else {
+      console.log('[CLICK] Клик на другом элементе той же формы - игнорируем')
     }
   }
   
