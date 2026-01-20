@@ -20,6 +20,7 @@ const originalPosition = ref<{ top: number; left: number; width: number } | null
 const overlayVisible = ref(false)
 const overlayElement = ref<HTMLElement | null>(null)
 const liftedContainer = ref<HTMLElement | null>(null)
+const isLifting = ref(false) // Флаг процесса поднятия элемента
 
 // Функция для проверки, является ли элемент элементом формы или его родителем
 const isFormElement = (element: HTMLElement | null): boolean => {
@@ -73,6 +74,9 @@ const findFormContainer = (element: HTMLElement): HTMLElement | null => {
 const liftFormElement = async (element: HTMLElement) => {
   const container = findFormContainer(element)
   if (!container) return
+  
+  // Устанавливаем флаг процесса поднятия
+  isLifting.value = true
   
   // Сохраняем оригинальную позицию
   const rect = container.getBoundingClientRect()
@@ -168,17 +172,29 @@ const liftFormElement = async (element: HTMLElement) => {
     clonedInput.addEventListener('input', syncValues)
     clonedInput.addEventListener('change', syncValues)
     
-    // Фокусируем клонированный элемент
-    clonedInput.focus()
-    
     // Сохраняем обработчики для очистки
     ;(clone as any)._syncHandlers = { syncValues, clonedInput, originalInput }
+    
+    // Фокусируем клонированный элемент с небольшой задержкой
+    // чтобы убедиться, что все DOM операции завершены
+    setTimeout(() => {
+      clonedInput.focus()
+      // Сбрасываем флаг после того как фокус установлен
+      setTimeout(() => {
+        isLifting.value = false
+      }, 100)
+    }, 50)
+  } else {
+    isLifting.value = false
   }
 }
 
 // Вернуть элемент на место
 const returnFormElement = async () => {
   if (!liftedContainer.value || !liftedElement.value || !originalPosition.value) return
+  
+  // Устанавливаем флаг, чтобы предотвратить обработку blur во время возврата
+  isLifting.value = true
   
   const container = liftedContainer.value
   const original = liftedElement.value
@@ -239,6 +255,9 @@ const returnFormElement = async () => {
   if (originalInput) {
     originalInput.blur()
   }
+  
+  // Сбрасываем флаг после завершения возврата
+  isLifting.value = false
 }
 
 // Обработчик фокуса на элементах формы
@@ -271,6 +290,9 @@ const handleFormFocus = async (event: FocusEvent) => {
 
 // Обработчик blur на элементах формы
 const handleFormBlur = (event: FocusEvent) => {
+  // Игнорируем blur во время процесса поднятия элемента
+  if (isLifting.value) return
+  
   const target = event.target as HTMLElement
   if (!liftedContainer.value) return
   
@@ -280,6 +302,9 @@ const handleFormBlur = (event: FocusEvent) => {
   if (clonedInput && liftedContainer.value && (target === clonedInput || target.contains(clonedInput) || clonedInput.contains(target))) {
     // Небольшая задержка чтобы проверить, не переключился ли фокус на другой элемент
     setTimeout(() => {
+      // Проверяем еще раз флаг поднятия
+      if (isLifting.value) return
+      
       const activeElement = document.activeElement as HTMLElement
       
       // Если фокус не на клонированном элементе или его родителе, возвращаем элемент
@@ -290,21 +315,10 @@ const handleFormBlur = (event: FocusEvent) => {
            !liftedContainer.value.contains(activeElement))) {
         returnFormElement()
       }
-    }, 150)
+    }, 200)
   } else if (liftedElement.value && target) {
-    // Blur на оригинальном элементе - проверяем, не переключился ли фокус на клон
-    setTimeout(() => {
-      const activeElement = document.activeElement as HTMLElement
-      if (!activeElement || 
-          (activeElement !== clonedInput && 
-           !liftedContainer.value?.contains(activeElement))) {
-        // Фокус не на клоне - возвращаем элемент только если это не переход на другой input
-        const newContainer = findFormContainer(activeElement)
-        if (!newContainer || newContainer === liftedElement.value) {
-          returnFormElement()
-        }
-      }
-    }, 150)
+    // Blur на оригинальном элементе - игнорируем, так как фокус должен переключиться на клон
+    // Это нормальное поведение при клонировании
   }
 }
 
