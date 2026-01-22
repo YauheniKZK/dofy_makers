@@ -41,7 +41,6 @@
             v-model:value="formModel.name"
             placeholder="Введите название товара"
             :disabled="productStore.createProductApiDataGetters.loading"
-            class="form-input-lifted"
             :class="{ 'active-form-el': isActiveFormElGetters }"
             @focus="handleFocus"
             @blur="handleBlur"
