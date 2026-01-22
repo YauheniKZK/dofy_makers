@@ -89,12 +89,6 @@ select,
   touch-action: manipulation;
 }
 
-/* Стили для поднятого элемента формы */
-.form-input-lifted {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-  background-color: #fff !important;
-}
-
 .form-input-overlay {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);

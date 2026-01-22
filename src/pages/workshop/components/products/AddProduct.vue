@@ -34,6 +34,9 @@
             :loading="categoryStore.getSubcategoriesApiDataGetters.loading"
             :disabled="categoryStore.getSubcategoriesApiDataGetters.loading"
             @update:value="handleSubcategoryChange"
+            :class="{ 'active-form-el': isActiveFormElGetters }"
+            @focus="handleFocus"
+            @blur="handleBlur"
           />
         </n-form-item>
         <n-form-item label="Название" path="name">
@@ -54,6 +57,9 @@
             placeholder="Введите описание товара"
             :rows="4"
             :disabled="productStore.createProductApiDataGetters.loading"
+            :class="{ 'active-form-el': isActiveFormElGetters }"
+            @focus="handleFocus"
+            @blur="handleBlur"
           />
         </n-form-item>
 
