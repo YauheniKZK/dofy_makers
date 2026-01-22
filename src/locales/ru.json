@@ -71,5 +71,9 @@
   "bundle_select_products": "Выберите товары для набора",
   "bundle_no_items": "Набор должен содержать хотя бы один товар",
   "bundle_item_quantity": "Количество",
-  "bundle_item_remove": "Удалить"
+  "bundle_item_remove": "Удалить",
+  "search_title": "Поиск",
+  "search_description": "Поиск товаров и услуг",
+  "search_placeholder": "Введите название товара или услуги",
+  "makers_title": "Мастера"
 }

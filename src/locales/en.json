@@ -71,5 +71,9 @@
   "bundle_select_products": "Select products for bundle",
   "bundle_no_items": "Bundle must contain at least one product",
   "bundle_item_quantity": "Quantity",
-  "bundle_item_remove": "Remove"
+  "bundle_item_remove": "Remove",
+  "search_title": "Search",
+  "search_description": "Search for products and services",
+  "search_placeholder": "Search for products and services",
+  "makers_title": "Makers"
 }

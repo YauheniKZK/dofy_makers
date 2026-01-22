@@ -22,7 +22,15 @@ export default () => {
       meta: {
         requiresAuth: true
       },
-      component: () => import('../pages/feeds/Feeds.vue')
+      redirect: '/feeds/main',
+      component: () => import('../pages/feeds/Index.vue'),
+      children: [
+        {
+          path: '/feeds/main',
+          name: 'feeds-main',
+          component: () => import('../pages/feeds/Main.vue')
+        }
+      ]
     },
     {
       path: '/knowledge',

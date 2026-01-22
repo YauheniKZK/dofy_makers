@@ -30,9 +30,11 @@
           <h2 class="text-xl font-semibold">Редактирование адреса</h2>
           <n-form ref="formRef" :model="formData" :rules="rules">
             <n-form-item label="Страна" path="country">
-              <n-input
+              <n-select
                 v-model:value="formData.country"
-                placeholder="Введите страну"
+                :options="countryOptions"
+                placeholder="Выберите страну"
+                filterable
               />
             </n-form-item>
             <n-form-item label="Город" path="city">
@@ -57,13 +59,34 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Location, Edit } from '@vicons/carbon'
-import { NIcon, NButton, NForm, NFormItem, NInput } from 'naive-ui'
+import { NIcon, NButton, NForm, NFormItem, NInput, NSelect } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import Drawer from '@/components/ui/Drawer.vue'
 import { useNotification } from '@/composables/useNotification'
 import { CheckmarkCircle20Filled, ErrorCircle20Filled } from '@vicons/fluent'
 import type { FormInst } from 'naive-ui'
+import { allCountries } from 'country-region-data'
+
+const listCountry = allCountries.map((e) => {
+  return {
+    label: e[0],
+    value: e[1],
+    listProvince: e[2].map((p) => {
+      return {
+        label: p[0],
+        value: p[1]
+      }
+    })
+  }
+})
+
+const countryOptions = computed(() => {
+  return listCountry.map(country => ({
+    label: country.label,
+    value: country.value
+  }))
+})
 
 const userStore = useUserStore()
 const { currentUser } = storeToRefs(userStore)
@@ -91,7 +114,9 @@ const locationText = computed(() => {
     parts.push(currentUser.value.city)
   }
   if (currentUser.value?.country) {
-    parts.push(currentUser.value.country)
+    // Находим название страны по коду
+    const country = listCountry.find(c => c.value === currentUser.value?.country)
+    parts.push(country ? country.label : currentUser.value.country)
   }
   return parts.join(', ') || ''
 })
