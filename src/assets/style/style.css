@@ -99,3 +99,23 @@ select,
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
+
+.background-form-el {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2001;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.active-form-el {
+  position: fixed !important;
+  top: 100px !important;
+  left: 24px !important;
+  width: calc(100% - 48px) !important;
+  border: 1px solid #000 !important;
+  z-index: 2003 !important;
+  background-color: #fff !important;
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, transform 0.3s ease !important;
+}

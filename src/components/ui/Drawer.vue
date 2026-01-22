@@ -35,7 +35,7 @@ const emit = defineEmits(['close'])
 
 <template>
   
-  <n-drawer :show="showModal" :placement="placement" @update:show="emit('close')" :height="height">
+  <n-drawer :show="showModal" :placement="placement" to=".drawer-container" @update:show="emit('close')" :height="height">
     <n-drawer-content class="flex flex-col" :class="{ 'pt-6': isShowCloseButton }">
       <div class="close-button" v-if="isShowCloseButton">
         <n-button text @click="emit('close')">

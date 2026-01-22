@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-col gap-4 grow">
+    <div class="background-form-el" :class="{ 'active': isActiveFormElGetters }" v-if="isActiveFormElGetters"></div>
     <div class="flex flex-col gap-2">
       <h2 class="text-xl font-bold">Добавить товар</h2>
       <p class="text-sm text-gray-600">Заполните форму для создания нового товара</p>
@@ -35,12 +36,15 @@
             @update:value="handleSubcategoryChange"
           />
         </n-form-item>
-
         <n-form-item label="Название" path="name">
           <n-input
             v-model:value="formModel.name"
             placeholder="Введите название товара"
             :disabled="productStore.createProductApiDataGetters.loading"
+            class="form-input-lifted"
+            :class="{ 'active-form-el': isActiveFormElGetters }"
+            @focus="handleFocus"
+            @blur="handleBlur"
           />
         </n-form-item>
 
@@ -381,16 +385,18 @@ import type { CreateProductInput, ProductBundleItemInput, CreateProductForBundle
 import type { Product } from '@/graphql/queries/get-products'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 
 const productStore = useProductStore()
 const categoryStore = useCategoryStore()
 const userStore = useUserStore()
 const router = useRouter()
-
+const appStore = useAppStore()
 const { createProductApiDataGetters, productsGetters, getProductsApiDataGetters } = storeToRefs(productStore)
 const { subcategoriesGetters, getSubcategoriesApiDataGetters } = storeToRefs(categoryStore)
 const { currentUserGetters } = storeToRefs(userStore)
-
+const { isActiveFormElGetters } = storeToRefs(appStore) 
+const { setIsActiveFormElAction } = appStore
 const formRef = ref<FormInst | null>(null)
 const productType = ref<'PRODUCT' | 'BUNDLE'>('PRODUCT')
 const activeTab = ref<string>('select-existing')
@@ -646,6 +652,14 @@ const handleSubcategoryChange = (value: string | null) => {
   formModel.value.subcategoryId = value || ''
 }
 
+const handleFocus = () => {
+  setIsActiveFormElAction(true)
+}
+
+const handleBlur = () => {
+  setIsActiveFormElAction(false)
+}
+
 const handleSubmit = async () => {
   try {
     await formRef.value?.validate()
@@ -780,4 +794,5 @@ watch(
 )
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
