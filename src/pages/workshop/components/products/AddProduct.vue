@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-4 grow">
-    <div class="background-form-el" :class="{ 'active': isActiveFormElGetters }" v-if="isActiveFormElGetters"></div>
+    <div class="background-form-el" :class="{ 'active': activeElementId !== null }" v-if="activeElementId !== null"></div>
     <div class="flex flex-col gap-2">
       <h2 class="text-xl font-bold">Добавить товар</h2>
       <p class="text-sm text-gray-600">Заполните форму для создания нового товара</p>
@@ -34,8 +34,8 @@
             :loading="categoryStore.getSubcategoriesApiDataGetters.loading"
             :disabled="categoryStore.getSubcategoriesApiDataGetters.loading"
             @update:value="handleSubcategoryChange"
-            :class="{ 'active-form-el': isActiveFormElGetters }"
-            @focus="handleFocus"
+            :class="{ 'active-form-el': activeElementId === 'subcategoryId' }"
+            @focus="handleFocus('subcategoryId')"
             @blur="handleBlur"
           />
         </n-form-item>
@@ -44,8 +44,8 @@
             v-model:value="formModel.name"
             placeholder="Введите название товара"
             :disabled="productStore.createProductApiDataGetters.loading"
-            :class="{ 'active-form-el': isActiveFormElGetters }"
-            @focus="handleFocus"
+            :class="{ 'active-form-el': activeElementId === 'name' }"
+            @focus="handleFocus('name')"
             @blur="handleBlur"
           />
         </n-form-item>
@@ -57,8 +57,8 @@
             placeholder="Введите описание товара"
             :rows="4"
             :disabled="productStore.createProductApiDataGetters.loading"
-            :class="{ 'active-form-el': isActiveFormElGetters }"
-            @focus="handleFocus"
+            :class="{ 'active-form-el': activeElementId === 'description' }"
+            @focus="handleFocus('description')"
             @blur="handleBlur"
           />
         </n-form-item>
@@ -407,6 +407,7 @@ const productType = ref<'PRODUCT' | 'BUNDLE'>('PRODUCT')
 const activeTab = ref<string>('select-existing')
 const selectedExistingProductId = ref<string | null>(null)
 const selectedExistingProductQuantity = ref<number>(1)
+const activeElementId = ref<string | null>(null)
 
 interface NewProductTab {
   id: string
@@ -657,11 +658,13 @@ const handleSubcategoryChange = (value: string | null) => {
   formModel.value.subcategoryId = value || ''
 }
 
-const handleFocus = () => {
+const handleFocus = (elementId: string) => {
+  activeElementId.value = elementId
   setIsActiveFormElAction(true)
 }
 
 const handleBlur = () => {
+  activeElementId.value = null
   setIsActiveFormElAction(false)
 }
 
