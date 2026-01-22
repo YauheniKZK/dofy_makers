@@ -104,6 +104,7 @@ select,
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
 }
 /* Анимация появления сверху вниз при фокусе */
 .active-form-el {
@@ -115,6 +116,7 @@ select,
   background-color: #fff !important;
   animation: slideDown 0.3s ease-out forwards !important;
   border-radius: 15px !important;
+  pointer-events: auto !important;
 }
 
 @keyframes slideDown {

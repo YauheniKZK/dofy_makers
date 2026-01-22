@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-col gap-4 grow">
-    <div class="background-form-el" :class="{ 'active': activeElementId !== null }" v-if="activeElementId !== null"></div>
     <div class="flex flex-col gap-2">
       <h2 class="text-xl font-bold">Добавить товар</h2>
       <p class="text-sm text-gray-600">Заполните форму для создания нового товара</p>
@@ -377,7 +376,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, provide } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { useCategoryStore } from '@/stores/category'
 import { storeToRefs } from 'pinia'
@@ -397,7 +396,6 @@ import type { CreateProductInput, ProductBundleItemInput, CreateProductForBundle
 import type { Product } from '@/graphql/queries/get-products'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { useAppStore } from '@/stores/app'
 import FormInput from '@/components/form/FormInput.vue'
 import FormSelect from '@/components/form/FormSelect.vue'
 import FormInputNumber from '@/components/form/FormInputNumber.vue'
@@ -406,18 +404,14 @@ const productStore = useProductStore()
 const categoryStore = useCategoryStore()
 const userStore = useUserStore()
 const router = useRouter()
-const appStore = useAppStore()
 const { createProductApiDataGetters, productsGetters, getProductsApiDataGetters } = storeToRefs(productStore)
 const { subcategoriesGetters, getSubcategoriesApiDataGetters } = storeToRefs(categoryStore)
 const { currentUserGetters } = storeToRefs(userStore)
-const { isActiveFormElGetters } = storeToRefs(appStore) 
-const { setIsActiveFormElAction } = appStore
 const formRef = ref<FormInst | null>(null)
 const productType = ref<'PRODUCT' | 'BUNDLE'>('PRODUCT')
 const activeTab = ref<string>('select-existing')
 const selectedExistingProductId = ref<string | null>(null)
 const selectedExistingProductQuantity = ref<number>(1)
-const activeElementId = ref<string | null>(null)
 
 interface NewProductTab {
   id: string
@@ -668,52 +662,6 @@ const handleSubcategoryChange = (value: string | null) => {
   formModel.value.subcategoryId = value || ''
 }
 
-const handleFocus = (elementId: string) => {
-  activeElementId.value = elementId
-  setIsActiveFormElAction(true)
-}
-
-const handleBlur = () => {
-  // Используем setTimeout чтобы дать время другому элементу получить focus
-  setTimeout(() => {
-    if (activeElementId.value !== null) {
-      const activeElement = document.activeElement
-      const isFormElement = activeElement?.closest('.n-input') || 
-                           activeElement?.closest('.n-base-selection') ||
-                           activeElement?.closest('.n-select') ||
-                           activeElement?.closest('.n-input-number')
-      
-      if (!isFormElement) {
-        activeElementId.value = null
-        setIsActiveFormElAction(false)
-      }
-    }
-  }, 150)
-}
-
-const handleSelectShow = (show: boolean, elementId: string) => {
-  if (!show && activeElementId.value === elementId) {
-    // Когда меню select закрывается, проверяем, не находится ли фокус на другом элементе
-    setTimeout(() => {
-      const activeElement = document.activeElement
-      const isFormElement = activeElement?.closest('.n-input') || 
-                           activeElement?.closest('.n-base-selection') ||
-                           activeElement?.closest('.n-select') ||
-                           activeElement?.closest('.n-input-number')
-      
-      if (!isFormElement) {
-        activeElementId.value = null
-        setIsActiveFormElAction(false)
-      }
-    }, 150)
-  }
-}
-
-// Provide для дочерних компонентов формы
-provide('activeElementId', activeElementId)
-provide('handleFocus', handleFocus)
-provide('handleBlur', handleBlur)
-provide('handleSelectShow', handleSelectShow)
 
 const handleSubmit = async () => {
   try {
@@ -803,8 +751,8 @@ onMounted(async () => {
     })
   }
   
-  // Обработчик клика вне элементов больше не нужен - используем только blur события
 })
+
 
 // Сбрасываем bundleItems при изменении типа товара
 watch(productType, (newType) => {
