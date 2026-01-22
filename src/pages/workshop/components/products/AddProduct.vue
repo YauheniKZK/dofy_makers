@@ -26,7 +26,8 @@
       <!-- Форма для обычного товара -->
       <template v-if="productType === 'PRODUCT'">
         <n-form-item label="Подкатегория" path="subcategoryId">
-          <n-select
+          <FormSelect
+            element-id="subcategoryId"
             v-model:value="formModel.subcategoryId"
             :options="subcategoryOptions"
             placeholder="Выберите подкатегорию"
@@ -34,38 +35,32 @@
             :loading="categoryStore.getSubcategoriesApiDataGetters.loading"
             :disabled="categoryStore.getSubcategoriesApiDataGetters.loading"
             @update:value="handleSubcategoryChange"
-            :class="{ 'active-form-el': activeElementId === 'subcategoryId' }"
-            @focus="handleFocus('subcategoryId')"
-            @blur="handleBlur"
           />
         </n-form-item>
         <n-form-item label="Название" path="name">
-          <n-input
+          <FormInput
+            element-id="name"
             v-model:value="formModel.name"
             placeholder="Введите название товара"
             :disabled="productStore.createProductApiDataGetters.loading"
-            :class="{ 'active-form-el': activeElementId === 'name' }"
-            @focus="handleFocus('name')"
-            @blur="handleBlur"
           />
         </n-form-item>
 
         <n-form-item label="Описание" path="description">
-          <n-input
+          <FormInput
+            element-id="description"
             v-model:value="formModel.description"
             type="textarea"
             placeholder="Введите описание товара"
             :rows="4"
             :disabled="productStore.createProductApiDataGetters.loading"
-            :class="{ 'active-form-el': activeElementId === 'description' }"
-            @focus="handleFocus('description')"
-            @blur="handleBlur"
           />
         </n-form-item>
 
         <div class="flex gap-4">
           <n-form-item label="Цена" path="price" class="flex-1">
-            <n-input-number
+            <FormInputNumber
+              element-id="price"
               v-model:value="formModel.price"
               placeholder="0"
               :min="0"
@@ -77,7 +72,8 @@
           </n-form-item>
 
           <n-form-item label="Валюта" path="currency" class="flex-1">
-            <n-select
+            <FormSelect
+              element-id="currency"
               v-model:value="formModel.currency"
               :options="currencyOptions"
               placeholder="Выберите валюту"
@@ -93,7 +89,8 @@
         <n-form-item label="Добавить существующий товар">
           <div class="flex flex-col gap-2">
             <div class="flex gap-2">
-              <n-select
+              <FormSelect
+                element-id="selectedExistingProductId"
                 v-model:value="selectedExistingProductId"
                 :options="availableProductsOptions"
                 placeholder="Выберите товар из списка"
@@ -103,8 +100,9 @@
                 class="flex-1"
                 @update:value="handleSelectExistingProduct"
               />
-              <n-input-number
+              <FormInputNumber
                 v-if="selectedExistingProductId"
+                element-id="selectedExistingProductQuantity"
                 v-model:value="selectedExistingProductQuantity"
                 :min="1"
                 :max="99"
@@ -143,7 +141,8 @@
             <n-tab-pane name="main-product" tab="Основной товар" :closable="false">
               <div class="flex flex-col gap-4 py-4">
                 <n-form-item label="Подкатегория" path="subcategoryId">
-                  <n-select
+                  <FormSelect
+                    element-id="bundle-subcategoryId"
                     v-model:value="formModel.subcategoryId"
                     :options="subcategoryOptions"
                     placeholder="Выберите подкатегорию"
@@ -155,7 +154,8 @@
                 </n-form-item>
 
                 <n-form-item label="Название" path="name">
-                  <n-input
+                  <FormInput
+                    element-id="bundle-name"
                     v-model:value="formModel.name"
                     placeholder="Введите название набора"
                     :disabled="productStore.createProductApiDataGetters.loading"
@@ -163,7 +163,8 @@
                 </n-form-item>
 
                 <n-form-item label="Описание" path="description">
-                  <n-input
+                  <FormInput
+                    element-id="bundle-description"
                     v-model:value="formModel.description"
                     type="textarea"
                     placeholder="Введите описание набора"
@@ -174,7 +175,8 @@
 
                 <div class="flex gap-4">
                   <n-form-item label="Цена" path="price" class="flex-1">
-                    <n-input-number
+                    <FormInputNumber
+                      element-id="bundle-price"
                       v-model:value="formModel.price"
                       placeholder="0"
                       :min="0"
@@ -186,7 +188,8 @@
                   </n-form-item>
 
                   <n-form-item label="Валюта" path="currency" class="flex-1">
-                    <n-select
+                    <FormSelect
+                      element-id="bundle-currency"
                       v-model:value="formModel.currency"
                       :options="currencyOptions"
                       placeholder="Выберите валюту"
@@ -207,7 +210,8 @@
               <div class="flex flex-col gap-4 py-4">
                 <n-form :model="tab.form" :rules="newProductFormRules" label-placement="top" ref="(el) => setTabFormRef(tab.id, el)">
                   <n-form-item label="Подкатегория" :path="`${tab.id}.subcategoryId`">
-                    <n-select
+                    <FormSelect
+                      :element-id="`tab-${tab.id}-subcategoryId`"
                       v-model:value="tab.form.subcategoryId"
                       :options="subcategoryOptions"
                       placeholder="Выберите подкатегорию"
@@ -218,7 +222,8 @@
                   </n-form-item>
 
                   <n-form-item label="Название" :path="`${tab.id}.name`">
-                    <n-input
+                    <FormInput
+                      :element-id="`tab-${tab.id}-name`"
                       v-model:value="tab.form.name"
                       placeholder="Введите название товара"
                       :disabled="productStore.createProductApiDataGetters.loading"
@@ -226,7 +231,8 @@
                   </n-form-item>
 
                   <n-form-item label="Описание" :path="`${tab.id}.description`">
-                    <n-input
+                    <FormInput
+                      :element-id="`tab-${tab.id}-description`"
                       v-model:value="tab.form.description"
                       type="textarea"
                       placeholder="Введите описание товара"
@@ -237,7 +243,8 @@
 
                   <div class="flex gap-4">
                     <n-form-item label="Цена" :path="`${tab.id}.price`" class="flex-1">
-                      <n-input-number
+                      <FormInputNumber
+                        :element-id="`tab-${tab.id}-price`"
                         v-model:value="tab.form.price"
                         placeholder="0"
                         :min="0"
@@ -249,7 +256,8 @@
                     </n-form-item>
 
                     <n-form-item label="Валюта" :path="`${tab.id}.currency`" class="flex-1">
-                      <n-select
+                      <FormSelect
+                        :element-id="`tab-${tab.id}-currency`"
                         v-model:value="tab.form.currency"
                         :options="currencyOptions"
                         placeholder="Выберите валюту"
@@ -259,7 +267,8 @@
                   </div>
 
                   <div class="flex items-center gap-2">
-                    <n-input-number
+                    <FormInputNumber
+                      :element-id="`tab-${tab.id}-quantity`"
                       v-model:value="tab.quantity"
                       :min="1"
                       :max="99"
@@ -303,7 +312,8 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-600">Количество:</span>
-              <n-input-number
+              <FormInputNumber
+                :element-id="`bundle-item-${index}-quantity`"
                 v-model:value="item.quantity"
                 :min="1"
                 :max="99"
@@ -367,17 +377,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, provide } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { useCategoryStore } from '@/stores/category'
 import { storeToRefs } from 'pinia'
 import {
   NForm,
   NFormItem,
-  NInput,
-  NSelect,
   NSwitch,
-  NInputNumber,
   NButton,
   NUpload,
   NRadioGroup,
@@ -391,6 +398,9 @@ import type { Product } from '@/graphql/queries/get-products'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
+import FormInput from '@/components/form/FormInput.vue'
+import FormSelect from '@/components/form/FormSelect.vue'
+import FormInputNumber from '@/components/form/FormInputNumber.vue'
 
 const productStore = useProductStore()
 const categoryStore = useCategoryStore()
@@ -664,9 +674,46 @@ const handleFocus = (elementId: string) => {
 }
 
 const handleBlur = () => {
-  activeElementId.value = null
-  setIsActiveFormElAction(false)
+  // Используем setTimeout чтобы дать время другому элементу получить focus
+  setTimeout(() => {
+    if (activeElementId.value !== null) {
+      const activeElement = document.activeElement
+      const isFormElement = activeElement?.closest('.n-input') || 
+                           activeElement?.closest('.n-base-selection') ||
+                           activeElement?.closest('.n-select') ||
+                           activeElement?.closest('.n-input-number')
+      
+      if (!isFormElement) {
+        activeElementId.value = null
+        setIsActiveFormElAction(false)
+      }
+    }
+  }, 150)
 }
+
+const handleSelectShow = (show: boolean, elementId: string) => {
+  if (!show && activeElementId.value === elementId) {
+    // Когда меню select закрывается, проверяем, не находится ли фокус на другом элементе
+    setTimeout(() => {
+      const activeElement = document.activeElement
+      const isFormElement = activeElement?.closest('.n-input') || 
+                           activeElement?.closest('.n-base-selection') ||
+                           activeElement?.closest('.n-select') ||
+                           activeElement?.closest('.n-input-number')
+      
+      if (!isFormElement) {
+        activeElementId.value = null
+        setIsActiveFormElAction(false)
+      }
+    }, 150)
+  }
+}
+
+// Provide для дочерних компонентов формы
+provide('activeElementId', activeElementId)
+provide('handleFocus', handleFocus)
+provide('handleBlur', handleBlur)
+provide('handleSelectShow', handleSelectShow)
 
 const handleSubmit = async () => {
   try {
@@ -755,6 +802,8 @@ onMounted(async () => {
       userId: currentUserGetters.value.id
     })
   }
+  
+  // Обработчик клика вне элементов больше не нужен - используем только blur события
 })
 
 // Сбрасываем bundleItems при изменении типа товара
