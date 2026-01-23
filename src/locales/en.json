@@ -75,5 +75,11 @@
   "search_title": "Search",
   "search_description": "Search for products and services",
   "search_placeholder": "Search for products and services",
-  "makers_title": "Makers"
+  "makers_title": "Makers",
+  "error": "Error",
+  "no_recommendations": "No recommendations available",
+  "error_loading_recommendations": "Error loading recommendations",
+  "recommended_products": "Recommended Products",
+  "recommended_services": "Recommended Services",
+  "recommended_masters": "Recommended Masters"
 }

@@ -75,5 +75,11 @@
   "search_title": "Поиск",
   "search_description": "Поиск товаров и услуг",
   "search_placeholder": "Введите название товара или услуги",
-  "makers_title": "Мастера"
+  "makers_title": "Мастера",
+  "error": "Ошибка",
+  "no_recommendations": "Рекомендации пока отсутствуют",
+  "error_loading_recommendations": "Ошибка при загрузке рекомендаций",
+  "recommended_products": "Рекомендуемые товары",
+  "recommended_services": "Рекомендуемые услуги",
+  "recommended_masters": "Рекомендуемые мастера"
 }
