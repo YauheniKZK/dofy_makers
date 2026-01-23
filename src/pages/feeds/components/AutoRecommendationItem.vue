@@ -60,7 +60,7 @@
       <div class="flex justify-center">
         <n-avatar
           :size="64"
-          :src="master.avatarUrl"
+          :src="master.avatarUrl || undefined"
           round
         >
           {{ getInitials(master.name) }}

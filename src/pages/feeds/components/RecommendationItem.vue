@@ -52,7 +52,7 @@
       <div class="flex justify-center">
         <n-avatar
           :size="64"
-          :src="item.master.avatarUrl"
+          :src="item.master.avatarUrl || undefined"
           round
         >
           {{ getInitials(item.master.name) }}
@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { NAvatar, NTag } from 'naive-ui'
-import type { RecommendationItem, RecommendationItemType } from '@/graphql/queries/get-recommendation-collections'
+import { RecommendationItemType, type RecommendationItem } from '@/graphql/queries/get-recommendation-collections'
 
 interface Props {
   item: RecommendationItem
@@ -91,9 +91,9 @@ interface Props {
 
 defineProps<Props>()
 
-const PRODUCT_TYPE: RecommendationItemType = 'PRODUCT'
-const SERVICE_TYPE: RecommendationItemType = 'SERVICE'
-const MASTER_TYPE: RecommendationItemType = 'MASTER'
+const PRODUCT_TYPE = RecommendationItemType.PRODUCT
+const SERVICE_TYPE = RecommendationItemType.SERVICE
+const MASTER_TYPE = RecommendationItemType.MASTER
 
 const formatPrice = (price: number, currency: string) => {
   return new Intl.NumberFormat('ru-RU', {
